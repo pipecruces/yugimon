@@ -28,27 +28,27 @@ class Usuario(models.Model):
     contraseña = models.CharField(max_length=200)
     id_rol = models.ForeignKey(Rol, on_delete = models.CASCADE)
 
-# class Publicacion_venta(models.Model):
-#     descripcion = models.CharField(max_length=200)
-#     fecha_publicacion = models.DateField()
-#     id_mazo = models.ForeignKey(Mazo, on_delete = models.CASCADE)
-#     id_usuario = models.ForeignKey(Usuario, on_delete = models.CASCADE)
+class Publicacion_venta(models.Model):
+    descripcion = models.CharField(max_length=200)
+    fecha_publicacion = models.DateField()
+    id_mazo = models.ForeignKey(Mazo, on_delete = models.CASCADE)
+    id_usuario = models.ForeignKey(Usuario, on_delete = models.CASCADE)
 
-# class Comentario(models.Model):
-#     descripcion = models.CharField(max_length=200)
-#     fecha_publicacion = models.DateField()
-#     id_mazo = models.ForeignKey(Mazo, on_delete = models.CASCADE)
-#     id_usuario = models.ForeignKey(Usuario, on_delete = models.CASCADE)
+class Comentario(models.Model):
+    descripcion = models.CharField(max_length=200)
+    fecha_publicacion = models.DateField()
+    id_mazo = models.ForeignKey(Mazo, on_delete = models.CASCADE)
+    id_usuario = models.ForeignKey(Usuario, on_delete = models.CASCADE)
 
-# class Usuario_notas(models.Model):
-#     nota_promedio = models.FloatField()
-#     id_mazo = models.ForeignKey(Mazo, on_delete = models.CASCADE)
-#     id_usuario = models.ForeignKey(Usuario, on_delete = models.CASCADE)
+class Usuario_notas(models.Model):
+    nota_promedio = models.FloatField()
+    id_mazo = models.ForeignKey(Mazo, on_delete = models.CASCADE)
+    id_usuario = models.ForeignKey(Usuario, on_delete = models.CASCADE)
 
-# class Publicacion_intercambio(models.Model):
-#     descripcion = models.CharField(max_length=200)
-#     fecha_publicacion = models.DateField()
-#     id_usuario = models.ForeignKey(Usuario, on_delete = models.CASCADE)
+class Publicacion_intercambio(models.Model):
+    descripcion = models.CharField(max_length=200)
+    fecha_publicacion = models.DateField()
+    id_usuario = models.ForeignKey(Usuario, on_delete = models.CASCADE)
 
 class Carta(models.Model):
     nombre = models.CharField(max_length=50)
@@ -61,9 +61,9 @@ class Carta(models.Model):
     id_tipo = models.ForeignKey(Tipo, on_delete = models.CASCADE)
     id_usuario = models.ForeignKey(Usuario, on_delete = models.CASCADE)
 
-# class Cartas_publicacion_intercambio(models.Model):
-#     id_publicacion_intercambio = models.ForeignKey(Publicacion_intercambio, on_delete = models.CASCADE)
-#     id_carta = models.ForeignKey(Carta, on_delete = models.CASCADE)
+class Cartas_publicacion_intercambio(models.Model):
+    id_publicacion_intercambio = models.ForeignKey(Publicacion_intercambio, on_delete = models.CASCADE)
+    id_carta = models.ForeignKey(Carta, on_delete = models.CASCADE)
 
 class Cartas_mazos(models.Model):
     id_carta = models.ForeignKey(Carta, on_delete = models.CASCADE)
