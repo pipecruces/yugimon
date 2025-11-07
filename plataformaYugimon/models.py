@@ -1,5 +1,3 @@
-from django.db import models
-
 # Create your models here.
 from django.db import models
 
@@ -12,9 +10,11 @@ class Tipo(models.Model):
 class Estado(models.Model):
     nombre = models.CharField(max_length=50)
 
+class Raza(models.Model):
+    nombre = models.CharField(max_length=50)
+
 class Rol(models.Model):
     nombre = models.CharField(max_length=50)
-    descripcion = models.CharField(max_length=200)
 
 class Mazo(models.Model):
     nombre = models.CharField(max_length=50)
@@ -55,7 +55,7 @@ class Carta(models.Model):
     habilidad = models.CharField(max_length=50)
     fuerza = models.IntegerField()
     coste = models.IntegerField()
-    raza = models.CharField(max_length=50)
+    id_raza = models.ForeignKey(Raza, on_delete = models.CASCADE)
     ilustracion = models.CharField(max_length=200)
     edicion = models.ForeignKey(Edicion, on_delete = models.CASCADE)
     id_tipo = models.ForeignKey(Tipo, on_delete = models.CASCADE)
