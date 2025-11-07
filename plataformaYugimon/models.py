@@ -57,7 +57,7 @@ class Carta(models.Model):
     coste = models.IntegerField()
     id_raza = models.ForeignKey(Raza, on_delete = models.CASCADE)
     ilustracion = models.CharField(max_length=200)
-    edicion = models.ForeignKey(Edicion, on_delete = models.CASCADE)
+    id_edicion = models.ForeignKey(Edicion, on_delete = models.CASCADE)
     id_tipo = models.ForeignKey(Tipo, on_delete = models.CASCADE)
     id_usuario = models.ForeignKey(Usuario, on_delete = models.CASCADE)
 

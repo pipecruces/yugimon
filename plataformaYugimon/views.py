@@ -13,7 +13,7 @@ def ingresarCarta(request):
         if form.is_valid():
             form.save()
             form = RegistroCarta()
-            return HttpResponseRedirect(reverse('ingresarCarta')) #NO SÉ SI PONER RESPONSE
+            return HttpResponseRedirect(reverse('tablaCartas')) #NO SÉ SI PONER RESPONSE
     data = {'form': form}
     return render(request, 'plataformaYugimon/formularioCartas.html', data)
 
@@ -25,11 +25,16 @@ def editarCarta(request, id):
         if form.is_valid():
             form.save()
             form = RegistroCarta()
-            return HttpResponseRedirect(reverse('editarCarta'))#ESTOS REVERSE HAY QUE CAMBIAR DESPUÉS
+            return HttpResponseRedirect(reverse('tablaCartas'))#ESTOS REVERSE HAY QUE CAMBIAR DESPUÉS
     data = {'form': form}
     return render(request, 'plataformaYugimon/formularioCartas.html', data)
 
 def eliminarCarta(request, id):
     cartas = Carta.objects.get(id = id)
     cartas.delete()
-    return HttpResponseRedirect(reverse('editarCarta')) #REVISAR REVERSE
+    return HttpResponseRedirect(reverse('tablaCartas')) #REVISAR REVERSE
+
+def tablaCartas(request):
+    cartas = Carta.objects.all()
+    data = {'cartas': cartas}
+    return render(request, 'plataformaYugimon/tablaCartas.html', data)
