@@ -21,4 +21,7 @@ from plataformaYugimon.views import *
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('ingresarCarta/', ingresarCarta, name='ingresarCarta'),
+    path('tablaCartas/', tablaCartas, name='tablaCartas'),
+    path('editarCarta/<int:id>', editarCarta, name='editarCarta'),
+    path('eliminarCarta/<int:id>', eliminarCarta, name='eliminarCarta'),
 ]
