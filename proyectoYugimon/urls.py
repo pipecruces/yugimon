@@ -16,10 +16,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from plataformaYugimon.views import inicio
-
+from plataformaYugimon.views import mostrarBanlist
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', inicio, name='inicio'),
+    path('', mostrarBanlist, name='mostrarBanlist'),
 ]

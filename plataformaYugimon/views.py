@@ -1,7 +1,7 @@
 from django.shortcuts import render
 
 # Create your views here.
-def inicio(request):
+def mostrarBanlist(request):
     ediciones = [
         {
             'id': '1',
