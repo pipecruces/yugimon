@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from django.shortcuts import render
 from plataformaYugimon.models import Carta
 from plataformaYugimon.forms import RegistroCarta
@@ -156,3 +157,23 @@ def mostrarBanlist(request):
     ]
     return render(request, 'plataformaYugimon/banlist.html', {'ediciones': ediciones})
 >>>>>>> feature/banlist
+=======
+from django.shortcuts import render, redirect
+from plataformaYugimon.forms import RegistroUsuario
+from django.urls import reverse_lazy
+from django.views.generic import CreateView
+from django.http import request
+
+# Create your views here.
+def SignUpView(request):
+    if request.method == 'POST':
+        form = RegistroUsuario(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('login')
+    else:
+        form = RegistroUsuario()
+        
+    data = {'form': form}
+    return render(request, 'registration/signup.html', data)
+>>>>>>> feature/login

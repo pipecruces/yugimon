@@ -1,6 +1,12 @@
-# Create your models here.
+<<<<<<< HEAD
+=======
 from django.db import models
 
+#Usar email para iniciar sesion
+from django.contrib.auth.models import AbstractUser
+
+>>>>>>> feature/login
+# Create your models here.
 class Edicion(models.Model):
     nombre = models.CharField(max_length=50)
 
@@ -22,11 +28,22 @@ class Mazo(models.Model):
     nota_promedio = models.FloatField()
     id_estado = models.ForeignKey(Estado, on_delete = models.CASCADE)
 
-class Usuario(models.Model):
-    nombre = models.CharField(max_length=50)
-    correo = models.CharField(max_length=50)
-    contraseña = models.CharField(max_length=200)
-    id_rol = models.ForeignKey(Rol, on_delete = models.CASCADE)
+#Usar email para iniciar sesion
+class Usuario(AbstractUser):
+    email = models.EmailField(unique=True)
+    id_rol = models.ForeignKey(Rol, on_delete = models.CASCADE, default=2)
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ('username',)
+
+    def __str__(self):
+        return self.email
+
+# class Usuario(models.Model):
+#     nombre = models.CharField(max_length=50)
+#     correo = models.CharField(max_length=50)
+#     contraseña = models.CharField(max_length=200)
+#     id_rol = models.ForeignKey(Rol, on_delete = models.CASCADE)
 
 class Publicacion_venta(models.Model):
     descripcion = models.CharField(max_length=200)

@@ -129,3 +129,8 @@ STATICFILES_DIRS = [STATIC_URL]
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+AUTH_USER_MODEL = 'plataformaYugimon.Usuario' #para iniciar sesion con email
+
+#Configuracíon de rutas de autenticación
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
