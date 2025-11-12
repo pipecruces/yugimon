@@ -1,11 +1,7 @@
-<<<<<<< HEAD
-=======
 from django.db import models
 
 #Usar email para iniciar sesion
 from django.contrib.auth.models import AbstractUser
-
->>>>>>> feature/login
 # Create your models here.
 class Edicion(models.Model):
     nombre = models.CharField(max_length=50)
