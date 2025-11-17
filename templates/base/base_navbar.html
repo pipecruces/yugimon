@@ -1,0 +1,77 @@
+{% load static %}
+
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+        </button>
+        <a class="navbar-brand" href="{% url 'home' %}">
+        <img src="{% static 'img/banner.png' %}" class="banner" alt="Bootstrap" width="200">
+        </a>
+        
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                <a class="nav-link" aria-current="page" href="#">Lista de Cartas</a>
+                </li>
+                <li class="nav-item">
+                <a class="nav-link" href="#">Lista de Mazos</a>
+                </li>
+                {% if user.is_superuser %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Admin
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'ingresarCarta' %}">Agregar Cartas</a></li>
+                            <li><a class="dropdown-item" href="{% url 'tablaCartas' %}">Tabla de Cartas</a></li>
+                        </ul>
+                    </li>
+                {% endif %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Ayuda
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">Tablero de Anuncios</a></li>
+                        <li><a class="dropdown-item" href="{% url 'mostrarBanlist' %}">Banlist</a></li>
+                    </ul>
+                </li>
+            </ul>
+            
+
+            <ul class="navbar-nav mb-2 mb-lg-0 ms-auto">
+                <li class="nav-item">
+                <a class="nav-link" href="#">❤️Donar</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        &#128100
+                    </a>
+                    {% if user.is_authenticated %}
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li class="nav-item">
+                                <a role="button" class="dropdown-item" href="#">Perfil</a>
+                            </li>
+                            <li class="nav-item">
+                                <form action="{% url 'logout' %}" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit" class="boton-logout dropdown-item">Logout</button>
+                                </form>
+                            </li>
+                        </ul>
+                    {% else %}
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li class="nav-item">
+                                <a role="button" class="dropdown-item" href="{% url 'login' %}">Ingreso</a>
+                            </li>
+                            <li class="nav-item">
+                                <a role="button" class="dropdown-item" href="{% url 'signup' %}">Registro</a>
+                            </li>
+                        </ul>
+                    {% endif %}
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
