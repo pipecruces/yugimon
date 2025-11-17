@@ -1,20 +1,10 @@
 from django import forms
-<<<<<<< HEAD
 from plataformaYugimon.views import Carta
-=======
 # from plataformaYugimon.views import Usuario
->>>>>>> feature/login
 from django.core import validators
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
 
-<<<<<<< HEAD
-# class RegistroUsuario(forms.Form):
-#     nombre = forms.CharField(max_length=50)
-#     correo = forms.CharField(max_length=50)
-#     contraseña = forms.CharField(max_length=200)
-
-=======
 #Para que deje crear usuarios con correo
 class RegistroUsuario(UserCreationForm):
     class Meta(UserCreationForm.Meta):
@@ -26,7 +16,6 @@ class RegistroUsuario(UserCreationForm):
 #     correo = forms.CharField(max_length=50)
 #     contraseña = forms.CharField(max_length=200)
 
->>>>>>> feature/login
 # class RegistroUsuario(forms.ModelForm):
 #     class Meta:
 #         model = Usuario
