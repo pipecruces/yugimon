@@ -15,7 +15,9 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+<<<<<<< HEAD
 from django.urls import path
+<<<<<<< HEAD
 from plataformaYugimon.views import *
 
 urlpatterns = [
@@ -24,12 +26,22 @@ urlpatterns = [
     path('tablaCartas/', tablaCartas, name='tablaCartas'),
     path('editarCarta/<int:id>', editarCarta, name='editarCarta'),
     path('eliminarCarta/<int:id>', eliminarCarta, name='eliminarCarta'),
-]
+=======
+from django.urls import path, include
+from django.views.generic.base import TemplateView
 
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('accounts/', include('django.contrib.auth.urls')),
+    path('', TemplateView.as_view(template_name='index.html'), name='home'),
+    path('usuarios/', include('plataformaYugimon.urls'))
+>>>>>>> feature/login
+]
+=======
 from plataformaYugimon.views import mostrarBanlist
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', mostrarBanlist, name='mostrarBanlist'),
 ]
-
+>>>>>>> feature/banlist
