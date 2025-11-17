@@ -1,11 +1,11 @@
-<<<<<<< HEAD
-from django.shortcuts import render
+
+from django.shortcuts import render, redirect
 from plataformaYugimon.models import Carta
-from plataformaYugimon.forms import RegistroCarta
-from django.urls import reverse
-from django.http import HttpResponseRedirect
+from plataformaYugimon.forms import RegistroCarta, RegistroUsuario
+from django.urls import reverse, reverse_lazy
+from django.http import HttpResponseRedirect, request
+from django.views.generic import CreateView
 # Create your views here.
-<<<<<<< HEAD
 
 def ingresarCarta(request):
     form = RegistroCarta()
@@ -40,7 +40,7 @@ def tablaCartas(request):
     cartas = Carta.objects.all()
     data = {'cartas': cartas}
     return render(request, 'plataformaYugimon/tablaCartas.html', data)
-=======
+
 def mostrarBanlist(request):
     ediciones = [
         {
@@ -156,13 +156,8 @@ def mostrarBanlist(request):
         }
     ]
     return render(request, 'plataformaYugimon/banlist.html', {'ediciones': ediciones})
->>>>>>> feature/banlist
-=======
-from django.shortcuts import render, redirect
-from plataformaYugimon.forms import RegistroUsuario
-from django.urls import reverse_lazy
-from django.views.generic import CreateView
-from django.http import request
+
+
 
 # Create your views here.
 def SignUpView(request):
@@ -176,4 +171,4 @@ def SignUpView(request):
         
     data = {'form': form}
     return render(request, 'registration/signup.html', data)
->>>>>>> feature/login
+
