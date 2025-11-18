@@ -5,8 +5,10 @@ from plataformaYugimon.forms import RegistroCarta, RegistroUsuario
 from django.urls import reverse, reverse_lazy
 from django.http import HttpResponseRedirect, request
 from django.views.generic import CreateView
+from django.contrib.auth.decorators import login_required
 # Create your views here.
 
+@login_required
 def ingresarCarta(request):
     form = RegistroCarta()
 
@@ -19,6 +21,7 @@ def ingresarCarta(request):
     data = {'form': form}
     return render(request, 'plataformaYugimon/formularioCartas.html', data)
 
+@login_required
 def editarCarta(request, id):
     cartas = Carta.objects.get(id = id)
     form = RegistroCarta(instance = cartas)
@@ -31,11 +34,13 @@ def editarCarta(request, id):
     data = {'form': form}
     return render(request, 'plataformaYugimon/formularioCartas.html', data)
 
+@login_required
 def eliminarCarta(request, id):
     cartas = Carta.objects.get(id = id)
     cartas.delete()
     return HttpResponseRedirect(reverse('tablaCartas')) #REVISAR REVERSE
 
+@login_required
 def tablaCartas(request):
     cartas = Carta.objects.all()
     data = {'cartas': cartas}
@@ -165,7 +170,7 @@ def SignUpView(request):
         form = RegistroUsuario(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('login')
+            return redirect('home')
     else:
         form = RegistroUsuario()
         
