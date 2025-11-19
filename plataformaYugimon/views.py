@@ -1,6 +1,6 @@
 
-from django.shortcuts import render, redirect
-from plataformaYugimon.models import Carta
+from django.shortcuts import render, redirect, get_list_or_404
+from plataformaYugimon.models import Carta, Mazo, Cartas_mazos
 from plataformaYugimon.forms import RegistroCarta, RegistroUsuario
 from django.urls import reverse, reverse_lazy
 from django.http import HttpResponseRedirect, request
@@ -162,8 +162,6 @@ def mostrarBanlist(request):
     ]
     return render(request, 'plataformaYugimon/banlist.html', {'ediciones': ediciones})
 
-
-
 # Create your views here.
 def SignUpView(request):
     if request.method == 'POST':
@@ -177,3 +175,46 @@ def SignUpView(request):
     data = {'form': form}
     return render(request, 'registration/signup.html', data)
 
+@login_required
+def crear_mazo(request, id_mazo):
+    mazo = get_list_or_404(Mazo, id=id_mazo, usuario=request.user)
+    cartas_en_mazo_query = Cartas_mazos.objects.filter(mazo=mazo).values('id_carta', 'cantidad')
+    cartas_en_mazo_dict = {}
+    for item in cartas_en_mazo_query:
+        id_carta = item['id_carta']
+        cantidad = item['cantidad']
+        
+        cartas_en_mazo_dict[id_carta] = cantidad
+    context = {
+        'cartas_en_mazo_dict': cartas_en_mazo_dict,
+    }
+    return render(request, 'plataformaYugimon/creacionMazo.html', context)
+
+@login_required
+def agregar_carta_a_mazo(request, id_mazo, id_carta):
+    if request.method == 'POST':
+        mazo = get_list_or_404(Mazo, id=id_mazo, usuario=request.user)
+        carta = get_list_or_404(Carta, id=id_carta)
+        relacion, created = Cartas_mazos.objects.get_or_create(
+            mazo=mazo,
+            carta=carta,
+            defaults={'cantidad': 1}
+        )
+        if not created:
+            if relacion.cantidad < 3: 
+                 relacion.cantidad += 1
+                 relacion.save()
+    return redirect('plataformaYugimon/creacionMazo.html', id_mazo=id_mazo)
+
+@login_required
+def quitar_carta_de_mazo(request, id_mazo, id_carta):
+    if request.method == 'POST':
+        mazo = get_list_or_404(Mazo, id=id_mazo, usuario=request.user)
+        carta = get_list_or_404(Carta, id=id_carta)
+        relacion = get_list_or_404(Cartas_mazos, mazo=mazo, carta=carta)
+        if relacion.cantidad > 1:
+            relacion.cantidad -= 1
+            relacion.save()
+        else:
+            relacion.delete()
+    return redirect('plataformaYugimon/creacionMazo.html', id_mazo=id_mazo)

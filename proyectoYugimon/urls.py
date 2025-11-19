@@ -30,4 +30,8 @@ urlpatterns = [
     path('', TemplateView.as_view(template_name='index.html'), name='home'),
     path('usuarios/', include('plataformaYugimon.urls')),
     path('mostrarBanlist/', mostrarBanlist, name='mostrarBanlist'),
+    path('crearMazo/<int:mazo_id>', crear_mazo, name='crear_mazo'),
+    path('agregar_carta/<int:mazo_id>,<int:carta_id>', agregar_carta_a_mazo, name='agregar_carta'),
+    path('quitar_carta/<int:mazo_id>,<int:carta_id>', quitar_carta_de_mazo, name='quitar_carta'),
+
 ]

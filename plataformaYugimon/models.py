@@ -80,6 +80,7 @@ class Cartas_publicacion_intercambio(models.Model):
     id_carta = models.ForeignKey(Carta, on_delete = models.CASCADE)
 
 class Cartas_mazos(models.Model):
+    cantidad = models.IntegerField(default=1)
     id_carta = models.ForeignKey(Carta, on_delete = models.CASCADE)
     id_mazo = models.ForeignKey(Mazo, on_delete = models.CASCADE)
 
