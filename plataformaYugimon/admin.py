@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import Usuario
+from .models import Usuario, Publicacion_intercambio, CategoriaPost, Carta
 # Register your models here.
 
 # Permite agregar usuarios con todos los campos necesarios desde el panel de admin
@@ -16,3 +16,6 @@ class CustomUserAdmin(UserAdmin):
     )
 
 admin.site.register(Usuario, CustomUserAdmin)
+admin.site.register(Publicacion_intercambio)
+admin.site.register(CategoriaPost) 
+admin.site.register(Carta)

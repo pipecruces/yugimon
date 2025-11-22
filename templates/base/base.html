@@ -27,7 +27,7 @@
         rel="stylesheet">
         
     <!-- Custom styles for this template-->
-    <link href="{% static 'css/sb-admin-2.min.css' %}" rel="stylesheet">
+    <!-- <link href="{% static 'css/sb-admin-2.min.css' %}" rel="stylesheet"> -->
     
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
     <link rel="stylesheet" href="{% static 'css/navbar.css' %}">
@@ -37,7 +37,16 @@
 
     {% include 'base/base_navbar.html' %}
  
-    {% block contenido %} Contenido Base {% endblock %}
+
+    <div class="container mt-4">
+
+      {% block contenido %} 
+      
+        Contenido Base 
+        
+      {% endblock %}
+
+    </div>
 
 
     <!-- Bootstrap core JavaScript-->

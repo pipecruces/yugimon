@@ -1,0 +1,76 @@
+{% extends 'base/base.html' %}
+
+{% block titulo %}
+    Posts de {{ categorias }}
+{% endblock %}
+
+{% block contenido %}
+
+    {% if categoria_posts %}
+        <div class="container mt-4">
+
+            <div class="alert alert-info d-flex justify-content-center">
+                <h1>Publicaciones de Intercambio de {{ categorias }}</h1>
+            </div>
+            <a class="btn btn-success" href="{% url 'postCarta' %}">Crear Publicación</a>
+            <a class="btn btn-secondary" href="{% url 'publicacionCarta' %}">Volver</a>
+            <hr>
+
+            {% for publicacion_intercambio in categoria_posts %}
+                <div class="card d-flex mb-4">
+                    <div class="card-header d-flex justify-content-between" style="position: relative;">
+                        <div>
+                            {{ publicacion_intercambio.autor.username }} 
+                            - <a class="stretched-link" href="{% url 'detallePublicacion' publicacion_intercambio.pk %}">{{ publicacion_intercambio.titulo }}</a> 
+                        </div>
+                        <div>
+                            Publicado hace {{ publicacion_intercambio.fecha|timesince }}
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {{ publicacion_intercambio.contenido|slice:'200'|safe }}
+                    </div>
+                    
+                    <div class="card-footer d-flex justify-content-between">
+                        <div>
+                            <small> Categoria: {{ publicacion_intercambio.categoria }} </small>
+                        </div>
+                        {% if user.id == publicacion_intercambio.autor.id %}
+                            <div>
+                                <a href="{% url 'editarPostCarta' publicacion_intercambio.pk %}">Editar📝</a> 
+                                - <a href="#" data-bs-toggle="modal" data-bs-target="#exampleModal{{publicacion_intercambio.pk}}">Eliminar ❌</a>
+                            </div>
+                            <!-- Modal Eliminar -->
+                            <div class="modal fade" id="exampleModal{{publicacion_intercambio.pk}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h1 class="modal-title fs-5" id="exampleModalLabel">Eliminar Post</h1>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Seguro que quieres eliminar el post: {{publicacion_intercambio.titulo}}
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                            {% include 'base/base_delPost.html' %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                        
+                </div>
+            {% endfor %}
+            
+
+        </div>
+    {% else %}
+        <div class="alert alert-info d-flex justify-content-center">
+            <h1>No hay posts de esta categoria</h1>
+        </div>
+        <a class="btn btn-secondary" href="{% url 'publicacionCarta' %}">Volver</a>
+    {% endif %}
+
+{% endblock %}

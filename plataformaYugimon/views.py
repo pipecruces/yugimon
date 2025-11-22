@@ -1,14 +1,43 @@
-
 from django.shortcuts import render, redirect
-from plataformaYugimon.models import Carta
-from plataformaYugimon.forms import RegistroCarta, RegistroUsuario
+from plataformaYugimon.models import *
+from plataformaYugimon.forms import *
 from django.urls import reverse, reverse_lazy
 from django.http import HttpResponseRedirect, request
-from django.views.generic import CreateView
-from django.contrib.auth.decorators import login_required
+from django.views.generic import CreateView, ListView, DetailView, UpdateView, DeleteView
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.views import generic
+from django.contrib.auth.views import PasswordChangeView
+
 # Create your views here.
 
-@login_required
+class PasswordsChangeView(PasswordChangeView):
+    form_class = PasswordChangedForm
+    success_url = reverse_lazy('home')
+
+
+def SignUpView(request):
+    if request.method == 'POST':
+        form = RegistroUsuario(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('home')
+    else:
+        form = RegistroUsuario()
+        
+    data = {'form': form}
+    return render(request, 'registration/signup.html', data)
+
+#Editar Cuenta
+class EditarCuentaView(generic.UpdateView):
+    form_class = EditarUsuario
+    template_name = 'registration/editarPerfil.html'
+    success_url = reverse_lazy('home')
+
+    def get_object(self):
+        return self.request.user
+
+
+@user_passes_test(lambda u: u.is_superuser)
 def ingresarCarta(request):
     form = RegistroCarta()
 
@@ -21,7 +50,7 @@ def ingresarCarta(request):
     data = {'form': form}
     return render(request, 'plataformaYugimon/formularioCartas.html', data)
 
-@login_required
+@user_passes_test(lambda u: u.is_superuser)
 def editarCarta(request, id):
     cartas = Carta.objects.get(id = id)
     form = RegistroCarta(instance = cartas)
@@ -34,13 +63,13 @@ def editarCarta(request, id):
     data = {'form': form}
     return render(request, 'plataformaYugimon/formularioCartas.html', data)
 
-@login_required
+@user_passes_test(lambda u: u.is_superuser)
 def eliminarCarta(request, id):
     cartas = Carta.objects.get(id = id)
     cartas.delete()
     return HttpResponseRedirect(reverse('tablaCartas')) #REVISAR REVERSE
 
-@login_required
+@user_passes_test(lambda u: u.is_superuser)
 def tablaCartas(request):
     cartas = Carta.objects.all()
     data = {'cartas': cartas}
@@ -162,18 +191,50 @@ def mostrarBanlist(request):
     ]
     return render(request, 'plataformaYugimon/banlist.html', {'ediciones': ediciones})
 
+#Vistas de publicaciones
+class PublicacionCartaView(ListView):
+    model = Publicacion_intercambio
+    template_name = 'plataformaYugimon/publicacionesCartas.html'
+    ordering = ['-fecha']
+
+    def get_context_data(self, *args, **kwargs):
+        categoria_menu = CategoriaPost.objects.all()
+        context = super(PublicacionCartaView, self).get_context_data(*args, **kwargs)
+        context['categoria_menu'] = categoria_menu
+        return context
 
 
-# Create your views here.
-def SignUpView(request):
-    if request.method == 'POST':
-        form = RegistroUsuario(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('home')
-    else:
-        form = RegistroUsuario()
-        
-    data = {'form': form}
-    return render(request, 'registration/signup.html', data)
+#Filtrar publicaciones por categoria
+@login_required
+def CategoriaView(request, categorias):
+    categoria_posts = Publicacion_intercambio.objects.filter(categoria=categorias.replace('-', ' '))
+    return render(request, 'plataformaYugimon/categorias.html', {'categorias':categorias.title().replace('-', ' '), 'categoria_posts':categoria_posts})
 
+#Vistas de publicaciones
+class PublicacionCartaDetail(DetailView):
+    model = Publicacion_intercambio
+    template_name = 'plataformaYugimon/detallesPublicacionCartas.html'
+
+class EscribirPostCarta(CreateView):
+    model = Publicacion_intercambio
+    form_class = PostForm
+    template_name = "plataformaYugimon/escribirPost.html"
+    success_url = reverse_lazy('publicacionCarta')
+
+    #Deja al usuario autenticado como autor por defecto
+    def form_valid(self, form):
+        form.instance.autor = self.request.user
+        return super().form_valid(form)
+
+class EditarPostCarta(UpdateView):
+    model = Publicacion_intercambio
+    template_name = "plataformaYugimon/editarPost.html"
+    # fields = ['titulo', 'contenido']
+    form_class = PostEditForm
+    success_url = reverse_lazy('publicacionCarta')
+
+class EliminarPostCarta(DeleteView):
+    model = Publicacion_intercambio
+    template_name = 'plataformaYugimon/publicacionesCartas.html'
+    success_url = reverse_lazy('publicacionCarta')
+    

@@ -1,0 +1,123 @@
+{% extends 'base/base.html' %}
+
+{% load static %}
+
+{% block titulo %}
+    {{publicacion_intercambio.titulo}}
+{% endblock %}
+
+{% block contenido %}
+
+    <a class="btn btn-secondary" href="{% url 'publicacionCarta' %}">Volver</a>
+    <div class="card d-flex mt-2">
+        <div class="card-header">
+            <h1>{{ publicacion_intercambio.titulo }}</h1>
+            <small>Por: {{ publicacion_intercambio.autor.username }}
+                - Fecha: {{ publicacion_intercambio.fecha }}
+            </small>
+        </div>
+        <div class="card-body">
+            {{ publicacion_intercambio.contenido|safe }}
+            <hr>
+
+            <div class="accordion" id="accordionExample">
+                <div class="accordion-item">
+
+                    <h2 class="accordion-header" id="headingOne">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                        Mi Oferta:
+                    </button>
+                    </h2>
+                    <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+                            <div class="row d-flex align-items-center justify-content-center">
+
+                                <div class="card col-12 col-lg-4">
+                                    <div class="card-header">
+                                        <h2>Tengo:</h2>
+                                    </div>
+                                    <div class="card-body d-flex justify-content-evenly gap-4 flex-wrap">
+                                        {% if publicacion_intercambio.cartas_tengo.all %}
+                                            {% for carta in publicacion_intercambio.cartas_tengo.all %}
+                                                <div>
+                                                    <div>
+                                                        Nombre: {{ carta.nombre }}
+                                                    </div>
+                                                    <div>
+                                                        <img src="{{ carta.ilustracion }}" alt="{{ carta.nombre }}" style="max-width: 150px;">
+                                                    </div>
+                                                    <div>
+                                                        (Fuerza: {{ carta.fuerza }})
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        {% else %}
+                                            <p>Esta publicación no tiene cartas asociadas.</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <img src="{% static 'img/trade.png' %}" alt="trade" style="width: 150px; height: 90px;">
+
+                                <div class="card col-12 col-lg-4">
+                                    <div class="card-header">
+                                        <h2>Quiero:</h2>
+                                    </div>
+                                    <div class="card-body d-flex justify-content-evenly gap-4 flex-wrap">
+                                        {% if publicacion_intercambio.cartas_quiero.all %}
+                                            {% for carta in publicacion_intercambio.cartas_quiero.all %}
+                                                <div>
+                                                    <div>
+                                                        Nombre: {{ carta.nombre }}
+                                                    </div>
+                                                    <div>
+                                                        <img src="{{ carta.ilustracion }}" alt="{{ carta.nombre }}" style="max-width: 150px;">
+                                                    </div>
+                                                    <div>
+                                                        (Fuerza: {{ carta.fuerza }})
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        {% else %}
+                                            <p>Esta publicación no tiene cartas asociadas.</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer d-flex justify-content-between">
+            <div>
+                <small>Categoria: <a href="{% url 'categoria' publicacion_intercambio.categoria %}"> {{ publicacion_intercambio.categoria }} </a></small>
+            </div>
+            {% if user.id == publicacion_intercambio.autor.id %}
+                <div>
+                    <a class="btn btn-primary" href="{% url 'editarPostCarta' publicacion_intercambio.pk %}">Editar📝</a> 
+                    - <a class="btn btn-danger" href="#" data-bs-toggle="modal" data-bs-target="#exampleModal{{publicacion_intercambio.pk}}">Eliminar ❌</a>
+                </div>
+                <!-- Modal Eliminar -->
+                <div class="modal fade" id="exampleModal{{publicacion_intercambio.pk}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Eliminar Post</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Seguro que quieres eliminar el post: {{publicacion_intercambio.titulo}}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        {% include 'base/base_delPost.html' %}
+                    </div>
+                    </div>
+                </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

@@ -1,4 +1,6 @@
 from django.db import models
+from django.urls import reverse
+from ckeditor.fields import RichTextField
 
 #Usar email para iniciar sesion
 from django.contrib.auth.models import AbstractUser
@@ -7,17 +9,32 @@ from django.contrib.auth.models import AbstractUser
 class Edicion(models.Model):
     nombre = models.CharField(max_length=50)
 
+    def __str__(self):
+        return self.nombre #para que en los formularios aparezca el nombre y no 'Object_Class_#'
+
 class Tipo(models.Model):
     nombre = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.nombre
 
 class Estado(models.Model):
     nombre = models.CharField(max_length=50)
 
+    def __str__(self):
+        return self.nombre
+
 class Raza(models.Model):
     nombre = models.CharField(max_length=50)
 
+    def __str__(self):
+        return self.nombre
+
 class Rol(models.Model):
     nombre = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.nombre
 
 class Mazo(models.Model):
     nombre = models.CharField(max_length=50)
@@ -34,7 +51,7 @@ class Usuario(AbstractUser):
     REQUIRED_FIELDS = ('username',)
 
     def __str__(self):
-        return self.email
+        return self.username
 
 # class Usuario(models.Model):
 #     nombre = models.CharField(max_length=50)
@@ -59,10 +76,30 @@ class Usuario_notas(models.Model):
     id_mazo = models.ForeignKey(Mazo, on_delete = models.CASCADE)
     id_usuario = models.ForeignKey(Usuario, on_delete = models.CASCADE)
 
+
+class CategoriaPost(models.Model):
+    nombre = models.CharField(max_length=255)
+    def __str__(self):
+        return self.nombre
+    
+    def get_absolute_url(self):
+        return reverse('publicacionCartas')
+
 class Publicacion_intercambio(models.Model):
-    descripcion = models.CharField(max_length=200)
-    fecha_publicacion = models.DateField()
-    id_usuario = models.ForeignKey(Usuario, on_delete = models.CASCADE)
+    titulo = models.CharField(max_length=255)
+    autor = models.ForeignKey(Usuario, on_delete = models.CASCADE)
+    contenido = RichTextField(blank=True, null=True)
+    fecha = models.DateTimeField(auto_now_add=True)
+    categoria = models.CharField(max_length=255)
+    resumen = models.CharField(max_length=255)
+    cartas_tengo = models.ManyToManyField('Carta', related_name='cartas_tengo', blank=True)
+    cartas_quiero = models.ManyToManyField('Carta', related_name='cartas_quiero', blank=True)
+
+    def __str__(self):
+        return self.titulo + ' | ' + str(self.autor)
+    
+    def get_absolute_url(self):
+        return reverse('detallePublicacion', args=(str(self.id)))
 
 class Carta(models.Model):
     nombre = models.CharField(max_length=50)
@@ -74,6 +111,10 @@ class Carta(models.Model):
     id_edicion = models.ForeignKey(Edicion, on_delete = models.CASCADE)
     id_tipo = models.ForeignKey(Tipo, on_delete = models.CASCADE)
     id_usuario = models.ForeignKey(Usuario, on_delete = models.CASCADE)
+
+    def __str__(self):
+        return 'Nombre: ' + self.nombre + '- Coste: ' + str(self.coste) + '- Tipo: ' + str(self.id_tipo) + '- raza: ' + str(self.id_raza)
+
 
 class Cartas_publicacion_intercambio(models.Model):
     id_publicacion_intercambio = models.ForeignKey(Publicacion_intercambio, on_delete = models.CASCADE)
