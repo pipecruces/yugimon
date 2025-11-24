@@ -1,10 +1,10 @@
 from django.shortcuts import render
-from plataformaYugimon.models import Carta
-from plataformaYugimon.forms import RegistroCarta
+from plataformaYugimon.models import Carta, Cartas_banlist
+from plataformaYugimon.forms import RegistroCarta, FormCartaBanlist
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 # Create your views here.
-<<<<<<< HEAD
+# <<<<<<< HEAD
 
 def ingresarCarta(request):
     form = RegistroCarta()
@@ -18,6 +18,9 @@ def ingresarCarta(request):
     data = {'form': form}
     return render(request, 'plataformaYugimon/formularioCartas.html', data)
 
+
+
+
 def editarCarta(request, id):
     cartas = Carta.objects.get(id = id)
     form = RegistroCarta(instance = cartas)
@@ -30,16 +33,38 @@ def editarCarta(request, id):
     data = {'form': form}
     return render(request, 'plataformaYugimon/formularioCartas.html', data)
 
+
+
 def eliminarCarta(request, id):
     cartas = Carta.objects.get(id = id)
     cartas.delete()
     return HttpResponseRedirect(reverse('tablaCartas')) #REVISAR REVERSE
 
+
+
 def tablaCartas(request):
     cartas = Carta.objects.all()
     data = {'cartas': cartas}
     return render(request, 'plataformaYugimon/tablaCartas.html', data)
-=======
+# =======
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def mostrarBanlist(request):
     ediciones = [
         {
@@ -155,4 +180,49 @@ def mostrarBanlist(request):
         }
     ]
     return render(request, 'plataformaYugimon/banlist.html', {'ediciones': ediciones})
->>>>>>> feature/banlist
+# >>>>>>> feature/banlist
+
+
+def addCartaBanlist(request):
+    form = FormCartaBanlist()
+
+    if request.method == 'POST':
+        form = FormCartaBanlist(request.POST)
+        if form.is_valid():
+            print("Formulario valido")
+            form.save()
+            form = FormCartaBanlist()
+            return HttpResponseRedirect(reverse('mostrarBanlist'))
+    
+    #LOGICA DE GUARDAR
+    data = {'form': form,
+            'titulo': 'Agregar Carta a la Banlist',
+            }
+    return render(request, 'plataformaYugimon/addCartaBanlist.html', data)
+
+
+
+
+def editarCartaBanlist(request, id):
+    carta_banlist = Cartas_banlist.objects.get(id=id)
+    form = FormCartaBanlist(instance=carta_banlist)
+
+    if request.method == 'POST':
+        form = FormCartaBanlist(request.POST, instance=carta_banlist)
+        if form.is_valid():
+            print("Formulario valido")
+            form.save()
+            form = FormCartaBanlist()
+            return HttpResponseRedirect(reverse('mostrarBanlist'))
+
+    data = {'form' : form,
+            'titulo': 'Editar Carta Banlist',
+            }
+    return render(request, 'plataformaYugimon/addCartaBanlist.html', data)
+
+
+
+def eliminarCartaBanlist(request, id):
+    carta_banlist = Cartas_banlist.objects.get(id=id)
+    carta_banlist.delete()
+    return HttpResponseRedirect(reverse('mostrarBanlist'))

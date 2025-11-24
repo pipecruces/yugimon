@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-<<<<<<< HEAD
+# <<<<<<< HEAD
 from plataformaYugimon.views import *
 
 urlpatterns = [
@@ -26,11 +26,14 @@ urlpatterns = [
     path('editarCarta/<int:id>', editarCarta, name='editarCarta'),
     path('eliminarCarta/<int:id>', eliminarCarta, name='eliminarCarta'),
 ]
-=======
+# =======
 from plataformaYugimon.views import mostrarBanlist
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', mostrarBanlist, name='mostrarBanlist'),
+    path('addCartaBanlist/', addCartaBanlist, name='ingresoCartaBanlist'),
+    path('editarCartaBanlist/', editarCartaBanlist, name="editarCartaBanlist"),
+    path('eliminarCartaBanlist', eliminarCartaBanlist, name="eliminarCartaBanlist"),
 ]
->>>>>>> feature/banlist
+# >>>>>>> feature/banlist

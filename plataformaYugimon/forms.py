@@ -34,3 +34,12 @@ class RegistroMazo(forms.Form):
     descripcion = forms.CharField(max_length=200)
     nota_promedio = forms.FloatField()
     id_estado = forms.IntegerField()
+
+
+class FormCartaBanlist(forms.Form):
+    nombre = forms.CharField(max_length=50)
+    habilidad = forms.CharField(max_length=50)
+    fureza = forms.CharField(max_length=50)
+    coste = forms.CharField(max_length=50)
+    ilustracion = forms.CharField(max_length=50)
+    edicion = forms.CharField(max_length=50)
