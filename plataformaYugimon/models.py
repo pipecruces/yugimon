@@ -90,7 +90,7 @@ class Publicacion_intercambio(models.Model):
     autor = models.ForeignKey(Usuario, on_delete = models.CASCADE)
     contenido = RichTextField(blank=True, null=True)
     fecha = models.DateTimeField(auto_now_add=True)
-    categoria = models.CharField(max_length=255)
+    categoria = models.ForeignKey(CategoriaPost, on_delete=models.CASCADE)
     resumen = models.CharField(max_length=255)
     cartas_tengo = models.ManyToManyField('Carta', related_name='cartas_tengo', blank=True)
     cartas_quiero = models.ManyToManyField('Carta', related_name='cartas_quiero', blank=True)
@@ -123,6 +123,7 @@ class Cartas_publicacion_intercambio(models.Model):
 class Cartas_mazos(models.Model):
     id_carta = models.ForeignKey(Carta, on_delete = models.CASCADE)
     id_mazo = models.ForeignKey(Mazo, on_delete = models.CASCADE)
+    cantidad = models.IntegerField(default=1)
 
 class Banlist(models.Model):
     fecha_edicion = models.DateField()

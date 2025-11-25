@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from plataformaYugimon.models import *
 from plataformaYugimon.forms import *
 from django.urls import reverse, reverse_lazy
@@ -7,7 +7,9 @@ from django.views.generic import CreateView, ListView, DetailView, UpdateView, D
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views import generic
 from django.contrib.auth.views import PasswordChangeView
-
+from django.views.decorators.http import  require_POST
+from django.http import JsonResponse
+import json
 # Create your views here.
 
 class PasswordsChangeView(PasswordChangeView):
@@ -207,7 +209,7 @@ class PublicacionCartaView(ListView):
 #Filtrar publicaciones por categoria
 @login_required
 def CategoriaView(request, categorias):
-    categoria_posts = Publicacion_intercambio.objects.filter(categoria=categorias.replace('-', ' '))
+    categoria_posts = Publicacion_intercambio.objects.filter(categoria__nombre=categorias.replace('-', ' '))
     return render(request, 'plataformaYugimon/categorias.html', {'categorias':categorias.title().replace('-', ' '), 'categoria_posts':categoria_posts})
 
 #Vistas de publicaciones
@@ -238,3 +240,172 @@ class EliminarPostCarta(DeleteView):
     template_name = 'plataformaYugimon/publicacionesCartas.html'
     success_url = reverse_lazy('publicacionCarta')
     
+class CreacionMazo(CreateView):
+    model = Mazo
+    form_class = MazoForm
+    template_name = "plataformaYugimon/crearMazo.html"
+    success_url = reverse_lazy('crearMazo')
+
+    #Deja al usuario autenticado como autor por defecto
+    def form_valid(self, form):
+        form.instance.autor = self.request.user
+        return super().form_valid(form)
+
+class ListaCartas(ListView):
+    model = Carta
+    template_name = 'plataformaYugimon/crearMazo.html'
+
+@require_POST
+def update_mazo(request):
+    carta_id = request.POST.get("carta_id")
+    mazo_id = request.POST.get("mazo_id")
+    action = request.POST.get("action")
+
+    mazo = Mazo.objects.get(id=mazo_id)
+    carta = Carta.objects.get(id=carta_id)
+
+    if action == "agregar":
+        Cartas_mazos.objects.get_or_create(id_mazo=mazo, id_carta=carta)
+
+    elif action == "quitar":
+        Cartas_mazos.objects.filter(id_mazo=mazo, id_carta=carta).delete()
+
+    return redirect("editar_mazo", mazo_id=mazo_id)
+
+def crear_mazo(request):
+    if request.method == "POST":
+        form = MazoForm(request.POST)
+        if form.is_valid():
+            mazo = form.save()
+            return redirect('editar_mazo', mazo_id=mazo.id)
+    else:
+        form = MazoForm()
+
+    return render(request, "plataformaYugimon/crearmazo.html", {'form':form})
+
+def editar_mazo(request, mazo_id):
+    mazo = Mazo.objects.get(id=mazo_id)
+    cartas = Carta.objects.all()
+    cartas_mazo = Cartas_mazos.objects.filter(id_mazo=mazo)
+
+    if request.method == "POST":
+        form = MazoForm(request.POST, instance=mazo)
+        if form.is_valid():
+            form.save()
+            return redirect("listarMazos")
+    else:
+        form = MazoForm(instance=mazo)
+
+    context = {"mazo": mazo, 'form': form, "object_list": cartas, "cartas_mazo": cartas_mazo}
+
+    return render(request, 'plataformaYugimon/editarMazo.html', context)
+
+
+@require_POST
+def update_mazo_ajax(request):
+    data = json.loads(request.body)
+
+    carta_id = data.get("carta_id")
+    mazo_id = data.get("mazo_id")
+    action = data.get("action")
+
+    # Obtener mazo
+    try:
+        mazo = Mazo.objects.get(id=mazo_id)
+    except Mazo.DoesNotExist:
+        return JsonResponse({"success": False, "error": "Mazo no encontrado."})
+
+    # Si la acción es solo CHECK no necesitamos carta
+    if action == "check":
+        cartas_qs = Cartas_mazos.objects.filter(id_mazo=mazo)
+
+        conteo = {}
+        for entry in cartas_qs:
+            cid = entry.id_carta.id
+            conteo[cid] = conteo.get(cid, 0) + 1
+
+        total_cartas = cartas_qs.count()
+
+        return JsonResponse({
+            "success": True,
+            "total": total_cartas,
+            "conteo": conteo
+        })
+
+    # Validamos que llegue una carta si NO es "check"
+    if not carta_id:
+        return JsonResponse({"success": False, "error": "Falta carta_id."})
+
+    try:
+        carta = Carta.objects.get(id=carta_id)
+    except Carta.DoesNotExist:
+        return JsonResponse({"success": False, "error": "Carta no encontrada."})
+
+    total_cartas = Cartas_mazos.objects.filter(id_mazo=mazo).count()
+    copias_carta = Cartas_mazos.objects.filter(id_mazo=mazo, id_carta=carta).count()
+
+    if action == "agregar":
+
+        if total_cartas >= 50:
+            return JsonResponse({"success": False, "error": "El mazo ya tiene 50 cartas."})
+
+        if copias_carta >= 3:
+            return JsonResponse({"success": False, "error": "Máximo 3 copias por carta."})
+
+        Cartas_mazos.objects.create(id_mazo=mazo, id_carta=carta)
+
+    elif action == "quitar":
+        Cartas_mazos.objects.filter(id_mazo=mazo, id_carta=carta).first().delete()
+
+    else:
+        return JsonResponse({"success": False, "error": "Acción inválida."})
+
+    cartas_mazo = list(
+        Cartas_mazos.objects.filter(id_mazo=mazo)
+        .select_related("id_carta")
+        .values(
+            "id_carta__id",
+            "id_carta__nombre",
+            "id_carta__ilustracion"
+        )
+    )
+
+    return JsonResponse({
+        "success": True,
+        "cartas_mazo": cartas_mazo,
+        "total": len(cartas_mazo),
+        "copias": copias_carta
+    })
+
+class CartaView(ListView):
+    model = Carta
+    template_name = 'plataformaYugimon/ListaCartas.html'
+
+def listarMazos(request):
+    mazos = Mazo.objects.all().order_by('-id')
+    return render(request, "plataformaYugimon/listarMazos.html", {
+        "mazos": mazos
+    })
+
+def verMazo(request, mazo_id):
+    mazo = Mazo.objects.get(id=mazo_id)
+    cartas = Cartas_mazos.objects.filter(id_mazo=mazo)
+
+    total = sum(c.cantidad for c in cartas)
+
+    return render(request, "plataformaYugimon/verMazo.html", {
+        "mazo": mazo,
+        "cartas": cartas,
+        "total": total,
+    })
+
+def eliminarMazo(request, mazo_id):
+    mazo = get_object_or_404(Mazo, id=mazo_id)
+
+    if request.method == "POST":
+        mazo.delete()
+        return redirect("listarMazos")
+
+    return render(request, "plataformaYugimon/eliminarMazo.html", {
+        "mazo": mazo
+    })

@@ -1,0 +1,52 @@
+{% extends 'base/base.html' %}
+
+{% block contenido %}
+    <div class="alert alert-info d-flex justify-content-center">
+        <h1>Cartas</h1>
+    </div>
+
+    <div class="row">
+
+        <div class="card col-2 me-4 h-50">
+            <div class="card-header">
+                Filtros
+            </div>
+            <div class="card-body">
+                Filtros
+            </div>
+        </div>
+
+        <div class="col">
+
+            <div class="card col">
+
+                <div class="card-body">
+                    <div class="row">
+                        {% for carta in object_list %}
+
+                        <div class="col justify-content-center mb-4">
+                            <a href="" data-bs-toggle="modal" data-bs-target="#exampleModal{{carta.id}}">
+                                <img src="{{ carta.ilustracion }}" width="150" alt="{{carta.nombre}}">
+                            </a>
+                        </div>
+                        <!-- Modal -->
+                        <div class="modal fade" id="exampleModal{{carta.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <img src="{{ carta.ilustracion }}" width="500" alt="{{carta.nombre}}">
+                        </div>
+                        </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+
+    </div>
+
+
+{% endblock %}

@@ -1,6 +1,6 @@
 from django import forms
 from plataformaYugimon.views import Carta
-from .models import Publicacion_intercambio, CategoriaPost, Usuario
+from .models import Publicacion_intercambio, CategoriaPost, Usuario, Mazo
 from django.core import validators
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, PasswordChangeForm
 from django.contrib.auth import get_user_model
@@ -55,20 +55,6 @@ class RegistroCarta(forms.ModelForm):
         model = Carta
         fields = '__all__'
 
-class RegistroMazo(forms.Form):
-    nombre = forms.CharField(max_length=50)
-    descripcion = forms.CharField(max_length=200)
-    nota_promedio = forms.FloatField()
-    id_estado = forms.IntegerField()
-
-#Para Agregar categorias de forma dinamica
-categorias = CategoriaPost.objects.all().values_list('nombre','nombre')
-
-categoria_lista = []
-for i in categorias:
-    categoria_lista.append(i)
-
-
 #Para darle formato a las publicaciones
 class PostForm(forms.ModelForm):
     class Meta:
@@ -77,11 +63,14 @@ class PostForm(forms.ModelForm):
         widgets = {
             'titulo': forms.TextInput(attrs={'class': 'form-control'}),
             'contenido': forms.Textarea(attrs={'class': 'form-control'}),
-            'categoria': forms.Select(choices=categoria_lista, attrs={'class': 'form-control'}),
+            'categoria': forms.Select(attrs={'class': 'form-control'}),
             'resumen': forms.TextInput(attrs={'class': 'form-control'}),
             'cartas_tengo': forms.SelectMultiple(attrs={'class':'form-control'}),
             'cartas_quiero': forms.SelectMultiple(attrs={'class':'form-control'}),
         }
+    def init(self, args, **kwargs):
+        super(PostForm, self).init(args, **kwargs)
+        self.fields['categoria'].widget.choices = CategoriaPost.objects.all().values_list('nombre', 'nombre')
 
 class PostEditForm(forms.ModelForm):
     class Meta:
@@ -90,8 +79,18 @@ class PostEditForm(forms.ModelForm):
         widgets = {
             'titulo': forms.TextInput(attrs={'class': 'form-control'}),
             'contenido': forms.Textarea(attrs={'class': 'form-control'}),
-            'categoria': forms.Select(choices=categoria_lista, attrs={'class': 'form-control'}),
+            'categoria': forms.Select(attrs={'class': 'form-control'}),
             'resumen': forms.TextInput(attrs={'class': 'form-control'}),
             'cartas_tengo': forms.SelectMultiple(attrs={'class':'form-control'}),
             'cartas_quiero': forms.SelectMultiple(attrs={'class':'form-control'}),
         }
+    def init(self, args, **kwargs):
+        super(PostEditForm, self).init(args, **kwargs)
+        self.fields['categoria'].widget.choices = CategoriaPost.objects.all().values_list('nombre', 'nombre')
+
+class MazoForm(forms.ModelForm):
+    class Meta:
+        model = Mazo
+        fields = ['nombre','descripcion','nota_promedio','id_estado']
+
+    
