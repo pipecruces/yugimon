@@ -1,0 +1,34 @@
+{% extends 'base/base.html' %}
+{% block contenido %}
+
+<h1>{{ mazo.nombre }}</h1>
+<p>{{ mazo.descripcion }}</p>
+
+<h3>Total de cartas: {{ total }}</h3>
+
+<table class="table table-bordered mt-3">
+    <thead>
+        <tr>
+            <th>Carta</th>
+            <th>Cantidad</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in cartas %}
+        <tr>
+            <td>{{ item.id_carta.nombre }}</td>
+            <td>{{ item.cantidad }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="2" class="text-center">El mazo está vacío.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{% url 'editar_mazo' mazo.id %}" class="btn btn-warning mt-3">Editar Mazo</a>
+<a href="{% url 'listarMazos' %}" class="btn btn-secondary mt-3">Volver</a>
+<a href="{% url 'eliminarMazo' mazo.id %}" class="btn btn-danger mt-3">Eliminar Mazo</a>
+
+{% endblock %}
