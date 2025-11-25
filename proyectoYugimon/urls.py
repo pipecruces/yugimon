@@ -18,7 +18,6 @@ from django.contrib import admin
 from django.urls import path, include
 from plataformaYugimon.views import *
 from django.views.generic.base import TemplateView
-from plataformaYugimon.views import mostrarBanlist
 from django.contrib.auth.decorators import login_required
 
 urlpatterns = [
@@ -33,7 +32,8 @@ urlpatterns = [
     path('eliminarCarta/<int:id>', eliminarCarta, name='eliminarCarta'),
 
     #Crud Banlist ****
-    path('mostrarBanlist/', mostrarBanlist, name='mostrarBanlist'),
+    path('mostrarBanlist/', MostrarCartasBanlistView.as_view(), name='mostrarBanlist'),
+    path('agregarBanlist/', CrearBanlist.as_view(), name='agregarCartasBanlist'),
 
     #Autenticación y home
     path('accounts/', include('django.contrib.auth.urls')),
@@ -47,6 +47,5 @@ urlpatterns = [
     path('editarPostCarta/<int:pk>', login_required(EditarPostCarta.as_view()), name="editarPostCarta"),
     path('eliminarPostCarta/<int:pk>', login_required(EliminarPostCarta.as_view()), name="eliminarPostCarta"),
     #Filtros de categoria
-    path('publicacionCartas/<str:categorias>', CategoriaView, name='categoria')
-
+    path('publicacionCartas/<str:categorias>', CategoriaView, name='categoria'),
 ]

@@ -11,8 +11,20 @@ class Edicion(models.Model):
 
     def __str__(self):
         return self.nombre #para que en los formularios aparezca el nombre y no 'Object_Class_#'
+    
+class Restriccion(models.Model):
+    nombre = models.CharField(max_length=50)
+
+    def _str_(self):
+        return self.nombre
 
 class Tipo(models.Model):
+    nombre = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.nombre
+    
+class Tipo_Restriccion(models.Model):
     nombre = models.CharField(max_length=50)
 
     def __str__(self):
@@ -124,10 +136,10 @@ class Cartas_mazos(models.Model):
     id_carta = models.ForeignKey(Carta, on_delete = models.CASCADE)
     id_mazo = models.ForeignKey(Mazo, on_delete = models.CASCADE)
 
-class Banlist(models.Model):
-    fecha_edicion = models.DateField()
-    descripcion = models.CharField(max_length=200)
 
-class Cartas_banlist(models.Model):
-    id_carta = models.ForeignKey(Carta, on_delete = models.CASCADE)
-    id_banlist = models.ForeignKey(Banlist, on_delete = models.CASCADE)
+
+
+class Cartas_Banlist(models.Model):
+    carta = models.ForeignKey(Carta, on_delete = models.CASCADE)
+    edicion = models.ForeignKey(Edicion, on_delete= models.CASCADE)
+    restriccion = models.ForeignKey(Restriccion, on_delete=models.CASCADE)
