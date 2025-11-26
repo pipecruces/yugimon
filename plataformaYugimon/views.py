@@ -3,7 +3,7 @@ from plataformaYugimon.models import *
 from plataformaYugimon.forms import *
 from django.urls import reverse, reverse_lazy
 from django.http import HttpResponseRedirect, request
-from django.views.generic import CreateView, ListView, DetailView, UpdateView, DeleteView
+from django.views.generic import CreateView, ListView, DetailView, UpdateView, DeleteView, TemplateView
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views import generic
 from django.contrib.auth.views import PasswordChangeView
@@ -77,121 +77,17 @@ def tablaCartas(request):
     data = {'cartas': cartas}
     return render(request, 'plataformaYugimon/tablaCartas.html', data)
 
-def mostrarBanlist(request):
-    ediciones = [
-        {
-            'id': '1',
-            'nombre': 'Edición 1: Nombre de la edicion',
-            'prohibidas':[
-                {
-                    'image': 'https://mazosyleyendas.b-cdn.net/PE%20COMP/Razas/2.-%20Dragon/Groostlang-small.webp',
-                },
-                {
-                    'image': 'https://mazosyleyendas.b-cdn.net/PE%20COMP/Soporte/1.-%20El%20Reto/Talismanes/Od%C3%ADn%20(Arte%20Alternativo)-small.webp'
-                },
-                {
-                    'image': 'https://mazosyleyendas.b-cdn.net/PE%20COMP/Soporte/5.-%20Esp%C3%ADritu%20de%20Drag%C3%B3n/Armas/Yoroi-small.webp'
-                }
-            ],
-            'unicas': [
-                {
-                    'image': 'https://mazosyleyendas.b-cdn.net/PE%20COMP/Soporte/1.-%20El%20Reto/Talismanes/Od%C3%ADn%20(Arte%20Alternativo)-small.webp'
-                },
-                {
-                    'image': 'https://mazosyleyendas.b-cdn.net/PE%20COMP/Razas/2.-%20Dragon/Quetzalc%C3%B3atl-small.webp'
-                },
-                {
-                    'image': 'https://mazosyleyendas.b-cdn.net/PE%20COMP/Razas/1.-%20Caballero/Caballero%20Negro-small.webp'
-                }
-            ],
-            'limitadas': [
-                {
-                    'image': 'https://mazosyleyendas.b-cdn.net/PE%20COMP/Soporte/1.-%20El%20Reto/Talismanes/Zeus%20(Arte%20Alternativo)-small.webp'
-                },
-                {
-                    'image': 'https://mazosyleyendas.b-cdn.net/PE%20COMP/Soporte/2.-%20Mundo%20G%C3%B3tico/Talismanes/Lucha%20de%20Golems-small.webp'
-                },
-                {
-                    'image': 'https://mazosyleyendas.b-cdn.net/PE%20COMP/Razas/4.-%20Cazador/Niamh-small.webp'
-                }
-            ]
-        },
-        {
-            'id': '2',
-            'nombre': 'Edición 2: Nombre de la edicion',
-            'prohibidas':[
-                {
-                    'image': 'https://mazosyleyendas.b-cdn.net/PE%20COMP/Razas/4.-%20Cazador/Exorcista-small.webp'
-                },
-                {
-                    'image': 'https://mazosyleyendas.b-cdn.net/PE%20COMP/Soporte/2.-%20Mundo%20G%C3%B3tico/Talismanes/Stribog%20(Arte%20Alternativo)-small.webp'
-                },
-                {
-                    'image': 'https://mazosyleyendas.b-cdn.net/PE%20COMP/Razas/7.-%20Bestia/Trauko%20(Arte%20Alternativo)-small.webp'
-                }
-            ],
-            'unicas': [
-                {
-                    'image': 'https://mazosyleyendas.b-cdn.net/PE%20COMP/Soporte/2.-%20Mundo%20G%C3%B3tico/Oros/Manada%20Mort%C3%ADfera%20(Arte%20Alternativo)-small.webp'
-                },
-                {
-                    'image': 'https://mazosyleyendas.b-cdn.net/PE%20COMP/Soporte/3.-%20La%20Ira%20del%20Nahual/T%C3%B3tems/T%C3%B3tem%20de%20Jaguar%20(Arte%20Alternativo)-small.webp'
-                },
-                {
-                    'image': 'https://mazosyleyendas.b-cdn.net/PE%20COMP/Razas/7.-%20Bestia/Sisiutl%20(Arte%20Alternativo)-small.webp'
-                }
-            ],
-            'limitadas': [
-                {
-                    'image': 'https://mazosyleyendas.b-cdn.net/PE%20COMP/Razas/5.-%20Lic%C3%A1ntropo/Lupo%20(Arte%20Alternativo)-small.webp'
-                },
-                {
-                    'image': 'https://mazosyleyendas.b-cdn.net/PE%20COMP/Soporte/3.-%20La%20Ira%20del%20Nahual/Oros/Bestias%20Furiosas%20(Arte%20Alternativo)-small.webp'
-                },
-                {
-                    'image': 'https://mazosyleyendas.b-cdn.net/PE%20COMP/Soporte/3.-%20La%20Ira%20del%20Nahual/T%C3%B3tems/T%C3%B3tem%20del%20%C3%81guila-small.webp'
-                }
-            ]
-        },
-        {
-            'id': '3',
-            'nombre': 'Edición 3: Nombre de la edicion',
-            'prohibidas':[
-                {
-                    'image': 'https://mazosyleyendas.b-cdn.net/PE%20COMP/Razas/7.-%20Bestia/Grifo-small.webp'  
-                },
-                {
-                    'image': 'https://mazosyleyendas.b-cdn.net/PE%20COMP/Razas/9.-%20Guerrero/Shuar-small.webp'
-                },
-                {
-                    'image': 'https://mazosyleyendas.b-cdn.net/PE%20COMP/Razas/11.-%20B%C3%A1rbaro/Bjorn%20Ragnarsson-small.webp'
-                }
-            ],
-            'unicas': [
-                {
-                    'image': 'https://mazosyleyendas.b-cdn.net/PE%20COMP/Soporte/3.-%20La%20Ira%20del%20Nahual/T%C3%B3tems/T%C3%B3tem%20de%20Serpiente%20(Arte%20Alternativo)-small.webp'
-                },
-                {
-                    'image': 'https://mazosyleyendas.b-cdn.net/PE%20COMP/Soporte/4.-%20Ragnarok/Oros/Horda%20B%C3%A1rbara%20(Arte%20Alternativo)-small.webp'
-                },
-                {
-                    'image': 'https://mazosyleyendas.b-cdn.net/PE%20COMP/Razas/10.-%20Abominaci%C3%B3n/Brokk-small.webp'
-                }
-            ],
-            'limitadas': [
-                {
-                    'image': 'https://mazosyleyendas.b-cdn.net/PE%20COMP/Razas/7.-%20Bestia/Pihuchen%20(Arte%20Alternativo)-small.webp',
-                },
-                {
-                    'image': 'https://mazosyleyendas.b-cdn.net/PE%20COMP/Soporte/5.-%20Esp%C3%ADritu%20de%20Drag%C3%B3n/Armas/Kabuto-small.webp'
-                },
-                {
-                    'image': 'https://mazosyleyendas.b-cdn.net/PE%20COMP/Razas/14.-%20Campe%C3%B3n/Guan%20Yu%20(Arte%20Alternativo)-small.webp'
-                }
-            ]
-        }
-    ]
-    return render(request, 'plataformaYugimon/banlist.html', {'ediciones': ediciones})
+def crearBanlist(request):
+    form = BanlistForm()
+    if request.method == 'POST':
+        form = BanlistForm(request.POST)
+        if form.is_valid():
+            form.save()
+            form = BanlistForm()
+            return HttpResponseRedirect(reverse('mostrarBanlist'))
+    data = {'form': form}
+    return render(request, 'plataformaYugimon/crearBanlist.html', data)
+
 
 #Vistas de publicaciones
 class PublicacionCartaView(ListView):
@@ -203,19 +99,33 @@ class PublicacionCartaView(ListView):
         categoria_menu = CategoriaPost.objects.all()
         context = super(PublicacionCartaView, self).get_context_data(*args, **kwargs)
         context['categoria_menu'] = categoria_menu
+        # Optimizacion: Cargar cartas relacionadas en la lista principal
+        context['object_list'] = self.model.objects.all().prefetch_related('cartas_tengo', 'cartas_quiero').order_by(*self.ordering)
         return context
 
 
 #Filtrar publicaciones por categoria
 @login_required
 def CategoriaView(request, categorias):
-    categoria_posts = Publicacion_intercambio.objects.filter(categoria__nombre=categorias.replace('-', ' '))
-    return render(request, 'plataformaYugimon/categorias.html', {'categorias':categorias.title().replace('-', ' '), 'categoria_posts':categoria_posts})
+    nombre_categoria = categorias.replace('-', ' ')
+    # CORRECCIÓN 2: Añadir prefetch_related para cargar cartas relacionadas
+    categoria_posts = Publicacion_intercambio.objects.filter(
+        categoria=nombre_categoria
+    ).prefetch_related('cartas_tengo', 'cartas_quiero') # <-- CORRECCIÓN APLICADA
+
+    return render(request, 'plataformaYugimon/categorias.html', {
+        'categorias': nombre_categoria.title(), 
+        'categoria_posts':categoria_posts
+    })
 
 #Vistas de publicaciones
 class PublicacionCartaDetail(DetailView):
     model = Publicacion_intercambio
     template_name = 'plataformaYugimon/detallesPublicacionCartas.html'
+    # Sugerencia: Asegurar la carga de cartas en el detalle
+    def get_queryset(self):
+        return super().get_queryset().prefetch_related('cartas_tengo', 'cartas_quiero')
+
 
 class EscribirPostCarta(CreateView):
     model = Publicacion_intercambio
@@ -409,3 +319,44 @@ def eliminarMazo(request, mazo_id):
     return render(request, "plataformaYugimon/eliminarMazo.html", {
         "mazo": mazo
     })
+class CrearBanlist(CreateView):
+    model = Cartas_Banlist
+    form_class = BanlistForm
+    template_name = "plataformaYugimon/agregarCartasBanlist.html"
+    success_url = reverse_lazy('mostrarBanlist')
+
+class MostrarCartasBanlistView(TemplateView):
+    template_name = 'plataformaYugimon/banlist.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # 1. Obtener TODAS las entradas, incluyendo las ediciones, cartas y restricciones.
+        # Esto reduce el número de consultas a la base de datos (SELECTs).
+        todas_las_entradas = Cartas_Banlist.objects.all().select_related('edicion', 'carta', 'restriccion')
+        
+        # 2. Inicializar la estructura anidada de agrupación
+        banlist_agrupada = {}
+        
+        # 3. Agrupar primero por Edición y luego por Restricción
+        for entrada in todas_las_entradas:
+            nombre_edicion = entrada.edicion.nombre
+            nombre_restriccion = entrada.restriccion.nombre
+            
+            # Agrupación por Edición
+            if nombre_edicion not in banlist_agrupada:
+                # Inicializa la edición como un diccionario vacío (para almacenar restricciones)
+                banlist_agrupada[nombre_edicion] = {}
+            
+            # Agrupación por Restricción (dentro de la Edición)
+            if nombre_restriccion not in banlist_agrupada[nombre_edicion]:
+                # Inicializa la restricción como una lista (para almacenar las cartas)
+                banlist_agrupada[nombre_edicion][nombre_restriccion] = []
+            
+            # Agrega la entrada de banlist (la carta) a la lista de la restricción correspondiente
+            banlist_agrupada[nombre_edicion][nombre_restriccion].append(entrada)
+            
+        # 4. Añadir la estructura agrupada al contexto
+        context['banlist_por_edicion'] = banlist_agrupada
+
+        return context

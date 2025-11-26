@@ -1,5 +1,4 @@
 {% extends 'base/base.html' %}
-
 {% load static %}
 
 {% block titulo %}
@@ -13,98 +12,75 @@
             Banlist (Lista de Cartas Restringidas)
         </div>
 
-        <div class="accordion" id="accordionEdiciones">
-            {% for edicion in ediciones %}
-            <div class="accordion-item">
-                
-            <h2 class="accordion-header" id="heading{{ edicion.id }}">
-                <button class="accordion-button collapsed" 
-                        type="button" 
-                        data-bs-toggle="collapse" 
-                        data-bs-target="#collapse{{ edicion.id }}" 
-                        aria-expanded="false" 
-                        aria-controls="collapse{{ edicion.id }}">
-                {{ edicion.nombre }}
-                </button>
-            </h2>
-            
-            <div id="collapse{{ edicion.id }}" 
-                class="accordion-collapse collapse" 
-                aria-labelledby="heading{{ edicion.id }}" 
-                data-bs-parent="#accordionEdiciones">
-
-                <div class="accordion-body">
-
-                    <div class="card mb-3">
-                        <h5 class="card-header">Cartas Prohibidas</h5>
-                        <div class="card-body">
-                            <div class="row">
-                                {% if edicion.prohibidas %}
-                                    {% for card in edicion.prohibidas %}
-                                    <div class="col-md-4 my-3">
-                                        <div class="card">
-                                            <img src="{{ card.image }}" class="card-img-top" alt="No hay Imagen">
-                                        </div>
-                                    </div>
-                                    {% endfor %}
-                                {% else %}
-                                    <p>No hay cartas en esta categoría.</p>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-
-
-
-                    <div class="card mb-3">
-                        <h5 class="card-header">Cartas Únicas</h5>
-                        <div class="card-body">
-                            <div class="row">
-                                {% if edicion.unicas %}
-                                    {% for card in edicion.unicas %}
-                                    <div class="col-md-4 my-3">
-                                        <div class="card">
-                                            <img src="{{ card.image }}" class="card-img-top" alt="No hay Imagen">
-                                        </div>
-                                    </div>
-                                    {% endfor %}
-                                {% else %}
-                                    <p>No hay cartas en esta categoría.</p>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="card">
-                        <h5 class="card-header">Cartas Limitadas</h5>
-                        <div class="card-body">
-                            <div class="row">
-                                {% if edicion.limitadas %}
-                                    {% for card in edicion.limitadas %}
-                                    <div class="col-md-4 my-3">
-                                        <div class="card">
-                                            <img src="{{ card.image }}" class="card-img-top" alt="No hay Imagen">
-                                        </div>
-                                    </div>
-                                    {% endfor %}
-                                {% else %}
-                                    <p>No hay cartas en esta categoría.</p>
-                                {% endif %}
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-            </div>
-
-            {% endfor %}
-
+        <div>
+            <a class="btn btn-primary" href="{% url 'agregarCartasBanlist' %}">Banear Cartas</a>
         </div>
 
+        <hr>
+
+        {% for nombre_edicion, restricciones_de_la_edicion in banlist_por_edicion.items %} 
+
+            {% with id_accordion=nombre_edicion|slugify %} 
+
+                <div class="accordion mb-4" id="accordionEdiciones">
+                    <div class="accordion-item">
+                        
+                    <h2 class="accordion-header" id="heading{{ id_accordion }}">
+                        <button class="accordion-button collapsed" 
+                                type="button" 
+                                data-bs-toggle="collapse" 
+                                data-bs-target="#collapse{{ id_accordion }}" 
+                                aria-expanded="false" 
+                                data-bs-parent="#accordionEdiciones"
+                                aria-controls="collapse{{ id_accordion }}">
+                                <h3>{{ nombre_edicion }}</h3> 
+                        </button>
+                    </h2>
+                    
+                    <div id="collapse{{ id_accordion }}" 
+                        class="accordion-collapse collapse" 
+                        aria-labelledby="heading{{ id_accordion }}" 
+                        data-bs-parent="#accordionEdiciones">
+
+                        <div class="accordion-body">
+                            
+                            {% for nombre_restriccion, lista_de_cartas in restricciones_de_la_edicion.items %}
+                                <div class="card mb-4">
+                                    
+                                    <h5 class="card-header">{{ nombre_restriccion }}</h5> 
+                                    
+                                    <div class="card-body">
+                                        <div class="row">
+                                            
+                                            {% for banlist_entry in lista_de_cartas %}
+                                                <div class="col-md-4 my-3">
+                                                    <div class="card">
+                                                        <img src="{{ banlist_entry.carta.ilustracion }}" class="card-img-top" alt="{{ banlist_entry.carta.nombre }}">
+                                                        <div class="card-body">
+                                                            <h5 class="card-title">{{ banlist_entry.carta.nombre }}</h5>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %} </div>
+
+                    </div>
+
+                    </div>
+                </div>
+            
+            {% endwith %}
+        
+        {% empty %} 
+
+            <div class="alert alert-info display-5 text-center my-5">
+                <h1>No hay cartas en el banlist</h1>
+            </div>
+
+        {% endfor %}
     </div>
-{% endblock %}
+{% endblock %}

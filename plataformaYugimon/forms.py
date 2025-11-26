@@ -1,9 +1,10 @@
 from django import forms
 from plataformaYugimon.views import Carta
-from .models import Publicacion_intercambio, CategoriaPost, Usuario, Mazo
+from .models import Publicacion_intercambio, CategoriaPost, Usuario, Cartas_Banlist, Mazo
 from django.core import validators
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, PasswordChangeForm
 from django.contrib.auth import get_user_model
+from datetime import date
 
 #Para que deje crear usuarios con correo
 class RegistroUsuario(UserCreationForm):
@@ -55,6 +56,12 @@ class RegistroCarta(forms.ModelForm):
         model = Carta
         fields = '__all__'
 
+class RegistroMazo(forms.Form):
+    nombre = forms.CharField(max_length=50)
+    descripcion = forms.CharField(max_length=200)
+    nota_promedio = forms.FloatField()
+    id_estado = forms.IntegerField()
+
 #Para darle formato a las publicaciones
 class PostForm(forms.ModelForm):
     class Meta:
@@ -68,8 +75,9 @@ class PostForm(forms.ModelForm):
             'cartas_tengo': forms.SelectMultiple(attrs={'class':'form-control'}),
             'cartas_quiero': forms.SelectMultiple(attrs={'class':'form-control'}),
         }
-    def init(self, args, **kwargs):
-        super(PostForm, self).init(args, **kwargs)
+    
+    def __init__(self, *args, **kwargs):
+        super(PostForm, self).__init__(*args, **kwargs)
         self.fields['categoria'].widget.choices = CategoriaPost.objects.all().values_list('nombre', 'nombre')
 
 class PostEditForm(forms.ModelForm):
@@ -93,4 +101,21 @@ class MazoForm(forms.ModelForm):
         model = Mazo
         fields = ['nombre','descripcion','nota_promedio','id_estado']
 
-    
+class BanlistForm(forms.ModelForm):
+    class Meta:
+        model = Cartas_Banlist
+        fields = ('carta', 'edicion', 'restriccion')
+        widgets = {
+            'carta': forms.Select(attrs={'class':'form-control'}),
+            'edicion': forms.Select(attrs={'class':'form-control'}),
+            'restriccion': forms.Select(attrs={'class':'form-control'}),
+        }
+
+class EditBanlistForm(forms.ModelForm):
+    class Meta:
+        model = Cartas_Banlist
+        fields = ('carta', 'edicion', 'restriccion')
+        widgets = {
+            'carta': forms.Select(attrs={'class':'form-control'}),
+            'edicion': forms.Select(attrs={'class':'form-control'}),
+            'restriccion': forms.Select(attrs={'class':'form-control'}),}
