@@ -1,0 +1,44 @@
+{% extends 'base/base_login.html' %}
+
+{% block titulo %}
+    Editar Perfil
+{% endblock %}
+
+{% block contenido %}
+    <div class="text-center">
+        <h1 class="h4 text-gray-900 mb-4">Edita tu Cuenta</h1>
+    </div>
+    <form class="user" method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <input type="email" class="form-control form-control-user" id="id_email"
+            name="{{ form.email.html_name }}"
+            autocomplete="email"
+            autofocus
+            autocapitalize="none"
+            required
+            placeholder="Correo electronico..."
+            value="{{ form.email.value|default_if_none:'' }}">
+        </div>
+        <div class="form-group">
+            <input type="text" class="form-control form-control-user" id="id_username"
+            name="{{ form.username.html_name }}"
+            autocomplete="username"
+            autofocus
+            autocapitalize="none"
+            required
+            placeholder="Nombre de usuario..."
+            value="{{ form.username.value|default_if_none:'' }}">
+        </div>
+        <a class="btn btn-primary btn-user btn-block" href="{% url 'changePasswd' %}">Cambiar Contraseña</a>
+        <button type="submit" class="btn btn-success btn-user btn-block">Guardar Cambios</button>
+        <a class="btn btn-danger btn-user btn-block" href="{% url 'home' %}">Cancelar</a>
+        {% if form.errors %}
+            <div class="alert alert-danger mt-3" role="alert">
+                {% for field, error in form.errors.items %}
+                    <strong>{{ field|title }}</strong>: {{ error|join:", "}}<br>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </form>
+{% endblock %}

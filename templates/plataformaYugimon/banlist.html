@@ -1,0 +1,86 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block titulo %}
+    Banlist
+{% endblock %}
+
+{% block contenido %}
+    <div class="container">
+
+        <div class="alert alert-info display-1 text-center my-5">
+            Banlist (Lista de Cartas Restringidas)
+        </div>
+        {% if user.is_superuser %}
+        <div>
+            <a class="btn btn-primary" href="{% url 'agregarCartasBanlist' %}">Banear Cartas</a>
+        </div>
+        {% endif %}
+        <hr>
+
+        {% for nombre_edicion, restricciones_de_la_edicion in banlist_por_edicion.items %} 
+
+            {% with id_accordion=nombre_edicion|slugify %} 
+
+                <div class="accordion mb-4" id="accordionEdiciones">
+                    <div class="accordion-item">
+                        
+                    <h2 class="accordion-header" id="heading{{ id_accordion }}">
+                        <button class="accordion-button collapsed" 
+                                type="button" 
+                                data-bs-toggle="collapse" 
+                                data-bs-target="#collapse{{ id_accordion }}" 
+                                aria-expanded="false" 
+                                data-bs-parent="#accordionEdiciones"
+                                aria-controls="collapse{{ id_accordion }}">
+                                <h3>{{ nombre_edicion }}</h3> 
+                        </button>
+                    </h2>
+                    
+                    <div id="collapse{{ id_accordion }}" 
+                        class="accordion-collapse collapse" 
+                        aria-labelledby="heading{{ id_accordion }}" 
+                        data-bs-parent="#accordionEdiciones">
+
+                        <div class="accordion-body">
+                            
+                            {% for nombre_restriccion, lista_de_cartas in restricciones_de_la_edicion.items %}
+                                <div class="card mb-4">
+                                    
+                                    <h5 class="card-header">{{ nombre_restriccion }}</h5> 
+                                    
+                                    <div class="card-body">
+                                        <div class="row">
+                                            
+                                            {% for banlist_entry in lista_de_cartas %}
+                                                <div class="col-md-4 my-3">
+                                                    <div class="card">
+                                                        <img src="{{ banlist_entry.carta.ilustracion }}" class="card-img-top" alt="{{ banlist_entry.carta.nombre }}">
+                                                        <div class="card-body">
+                                                            <h5 class="card-title">{{ banlist_entry.carta.nombre }}</h5>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %} </div>
+
+                    </div>
+
+                    </div>
+                </div>
+            
+            {% endwith %}
+        
+        {% empty %} 
+
+            <div class="alert alert-info display-5 text-center my-5">
+                <h1>No hay cartas en el banlist</h1>
+            </div>
+
+        {% endfor %}
+    </div>
+{% endblock %}

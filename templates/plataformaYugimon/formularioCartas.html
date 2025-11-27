@@ -1,0 +1,31 @@
+{% extends 'base/base.html' %}
+
+{% block titulo %}
+    Agregar Cartas
+{% endblock %}
+
+{% block contenido %}
+
+  {% if user.is_superuser %}
+    <div class="container">
+
+      <div class="alert alert-info display-5 text-center my-5">
+          Yugimon
+      </div>
+    
+      <div class="row justify-content-center">
+          <form method="post" class="col-6 card p-4">
+              {% csrf_token %}
+              {{form.as_p}}
+              <input type="submit" class="btn btn-success">
+          </form>
+      </div>
+      <br>
+    </div>
+  {% else %}
+    <div class="container my-5">
+      <h1 class="alert alert-danger">NO TIENES PERMISO PARA REALIZAR ESTA ACCION!</h1>
+      <a href="{% url 'home' %}" class="btn btn-danger"> VOLVER A HOME </a>
+    </div>
+  {% endif %}
+{% endblock %}

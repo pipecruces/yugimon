@@ -1,0 +1,46 @@
+{% extends 'base/base.html' %}
+{% block contenido %}
+
+<h1 class="mb-4">Lista de Mazos</h1>
+
+<a href="{% url 'crearMazo' %}" class="btn btn-primary mb-3">Crear nuevo mazo</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Autor</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for mazo in mazos %}
+        <tr>
+            <td>{{ mazo.id }}</td>
+            <td>{{ mazo.nombre }}</td>
+            <td>{{ mazo.descripcion }}</td>
+            <td>{{ mazo.id_usuario.username }}</td>
+            <td>
+                {% if request.user.is_authenticated and request.user.id == mazo.id_usuario_id %}
+                <a href="{% url 'editar_mazo' mazo.id %}" class="btn btn-warning btn-sm">Editar</a>
+                {% endif %}
+                <a href="{% url 'verMazo' mazo.id %}" class="btn btn-info btn-sm">Ver</a>
+                {% if request.user.is_authenticated and request.user.id == mazo.id_usuario_id %}
+                <form method="post" action="{% url 'eliminarMazo' mazo.id %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                </form>
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4" class="text-center">No hay mazos creados aún.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

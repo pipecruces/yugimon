@@ -1,0 +1,44 @@
+{% extends 'base/base_login.html' %}
+
+{% block titulo %}
+    Iniciar Sesion
+{% endblock %}
+
+{% block contenido %}
+    <div class="text-center">
+        <h1 class="h4 text-gray-900 mb-4">Bienvenido!</h1>
+    </div>
+    <form class="user" method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <input type="email" class="form-control form-control-user"
+                id="id_username"
+                name="{{form.username.html_name}}"
+                autocomplete="username"
+                autofocus
+                value="{{ form.username.value|default_if_none:''}}"
+                placeholder="Ingresar el correo...">
+        </div>
+        <div class="form-group">
+            <input type="password" class="form-control form-control-user"
+                id="id_password"
+                name="{{form.password.html_name}}"
+                placeholder="Contraseña">
+        </div>
+        <button type="submit" class="btn btn-primary btn-user btn-block">Iniciar Sesión</button>
+
+        {% if form.errors %}
+            <div class="alert alert-danger mt-3" role="alert">
+                <strong>Oops!</strong> Hubo un problema con tu usuario o contraseña. Intentalo de nuevo.
+            </div>
+        {% endif %}
+
+    </form>
+    <hr>
+    <div class="text-center">
+        <a class="small" href="{% url 'password_reset' %}">Recuperar contraseña</a>
+    </div>
+    <div class="text-center">
+        <a class="small" href="{% url 'signup' %}">Crear una cuenta!</a>
+    </div>
+{% endblock %}

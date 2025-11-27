@@ -1,0 +1,158 @@
+{% extends 'base/base.html' %}
+
+{% load static %}
+
+{% block titulo %}
+    Editar Mazo
+{% endblock %}
+
+{% block contenido %}
+
+<div class="row">
+
+    <div class="justify-content-evenly d-flex gap-4">
+        <div class="col card-body justify-content-evenly d-flex gap-4 flex-wrap">
+    
+            {% for carta in object_list %}
+                <div>
+                    <div>
+                        Nombre: {{ carta.nombre }}
+                    </div>
+                    
+                    <img src="{{ carta.ilustracion }}" alt="{{ carta.nombre }}" style="max-width: 150px;">
+                    
+    
+                    <div class="mt-2 d-flex gap-2">               
+                        <button class="btn-agregar" data-id="{{ carta.id }}">Agregar</button>
+                        <button class="btn-quitar" data-id="{{ carta.id }}">Quitar</button>
+                    </div>
+    
+                </div>
+            {% endfor %}    
+        </div>
+    
+        <div class="col-4 d-flex align-items-center">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Cartas en este mazo:</h3>
+                </div>
+                <div class="card-body">
+                    <div id="lista-mazo" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        {% for cartas_en_mazo in cartas_mazo %}
+                            <div class="item-carta" data-id="{{cartas_en_mazo.id_carta.id}}">
+                                <img src="{{ cartas_en_mazo.id_carta.ilustracion }}" style="width: 50px;">
+                                {{ cartas_en_mazo.id_carta.nombre }}
+                            </div>
+                        {% endfor %}
+                    </div>  
+
+                </div>
+                <div class="card-footer">
+                    <form method="post" class="mb-4">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                
+                        <button type="submit" class="btn btn-success">
+                            Guardar cambios del mazo
+                        </button>
+                    </form>
+
+                </div>
+            </div>
+
+    
+        </div>
+    </div>
+
+</div>
+
+<script>
+
+const mazoId = "{{ mazo.id }}";
+const url = "{% url 'update_mazo_ajax' %}";
+
+
+function actualizarLista(cartas) {
+    let contenedor = document.getElementById("lista-mazo");
+    contenedor.innerHTML = "";
+
+    cartas.forEach(c => {
+        contenedor.innerHTML += `
+            <div class="item-carta" data-id="${c.id_carta__id}" 
+                style="display:flex; flex-direction:column; align-items:center; width:70px;">
+                <img src="${c.id_carta__ilustracion}" style="width:60px; border-radius:6px;">
+                <small>${c.id_carta__nombre}</small>
+            </div>
+        `;
+    });
+
+    actualizarEstadoBotones();
+}
+
+
+async function actualizarEstadoBotones() {
+    const response = await fetch(url, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            carta_id: 0,
+            mazo_id: mazoId,
+            action: "check"
+        })
+    });
+
+    const data = await response.json();
+    const total = data.total;
+    const conteo = data.conteo; 
+
+    document.querySelectorAll(".btn-agregar").forEach(btn => {
+        let id = btn.dataset.id;
+        let copias = conteo[id] || 0;
+
+        btn.disabled = total >= 50 || copias >= 3;
+    });
+}
+
+
+async function enviarAccion(cartaId, accion) {
+    const response = await fetch(url, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            carta_id: cartaId,
+            mazo_id: mazoId,
+            action: accion
+        })
+    });
+
+    const data = await response.json();
+
+    if (!data.success) {
+        alert(data.error);
+        return;
+    }
+
+    actualizarLista(data.cartas_mazo);
+}
+
+
+document.querySelectorAll(".btn-agregar").forEach(btn => {
+    btn.addEventListener("click", () => enviarAccion(btn.dataset.id, "agregar"));
+});
+
+document.querySelectorAll(".btn-quitar").forEach(btn => {
+    btn.addEventListener("click", () => enviarAccion(btn.dataset.id, "quitar"));
+});
+
+
+actualizarEstadoBotones();
+
+</script>
+
+{% endblock %}
