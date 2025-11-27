@@ -57,7 +57,9 @@
                         Banlist
                     </a>
                     <ul class="dropdown-menu">
+                        {% if user.is_superuser %}
                         <li><a class="nav-link" href="{% url 'agregarCartasBanlist' %}">Crear Banlist</a></li>
+                        {% endif %}
                         <li><a class="nav-link" href="{% url 'mostrarBanlist' %}">Banlist</a></li>
 
                     </ul>

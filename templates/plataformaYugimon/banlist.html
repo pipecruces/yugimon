@@ -11,11 +11,11 @@
         <div class="alert alert-info display-1 text-center my-5">
             Banlist (Lista de Cartas Restringidas)
         </div>
-
+        {% if user.is_superuser %}
         <div>
             <a class="btn btn-primary" href="{% url 'agregarCartasBanlist' %}">Banear Cartas</a>
         </div>
-
+        {% endif %}
         <hr>
 
         {% for nombre_edicion, restricciones_de_la_edicion in banlist_por_edicion.items %} 

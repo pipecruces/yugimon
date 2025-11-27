@@ -40,21 +40,10 @@ class PasswordChangedForm(PasswordChangeForm):
 #         fields = '__all__'
 #     nombre = forms.CharField(validators=[validators.MinLengthValidator(3), validators.MaxLengthValidator(30)])
 
-class RegistroCarta(forms.Form):
-    nombre = forms.CharField(max_length=50)
-    habilidad = forms.CharField(max_length=50)
-    fuerza = forms.IntegerField()
-    coste = forms.IntegerField()
-    id_raza = forms.IntegerField()
-    ilustracion = forms.CharField(max_length=200)
-    edicion = forms.IntegerField()
-    id_tipo = forms.IntegerField()
-    id_usuario = forms.IntegerField()
-
 class RegistroCarta(forms.ModelForm):
     class Meta:
         model = Carta
-        fields = '__all__'
+        exclude = ['id_usuario']  
 
 class RegistroMazo(forms.Form):
     nombre = forms.CharField(max_length=50)
@@ -66,32 +55,31 @@ class RegistroMazo(forms.Form):
 class PostForm(forms.ModelForm):
     class Meta:
         model = Publicacion_intercambio
-        fields = ('titulo', 'contenido', 'categoria', 'resumen', 'cartas_tengo', 'cartas_quiero')
+        fields = ('titulo', 'contenido', 'categoria', 'cartas_tengo', 'cartas_quiero')
         widgets = {
             'titulo': forms.TextInput(attrs={'class': 'form-control'}),
             'contenido': forms.Textarea(attrs={'class': 'form-control'}),
             'categoria': forms.Select(attrs={'class': 'form-control'}),
-            'resumen': forms.TextInput(attrs={'class': 'form-control'}),
             'cartas_tengo': forms.SelectMultiple(attrs={'class':'form-control'}),
             'cartas_quiero': forms.SelectMultiple(attrs={'class':'form-control'}),
         }
-    
-    def __init__(self, *args, **kwargs):
-        super(PostForm, self).__init__(*args, **kwargs)
+
+    def init(self, args, **kwargs):
+        super(PostForm, self).init(args, **kwargs)
         self.fields['categoria'].widget.choices = CategoriaPost.objects.all().values_list('nombre', 'nombre')
 
 class PostEditForm(forms.ModelForm):
     class Meta:
         model = Publicacion_intercambio
-        fields = ('titulo', 'contenido', 'categoria', 'resumen',  'cartas_tengo', 'cartas_quiero')
+        fields = ('titulo', 'contenido', 'categoria', 'cartas_tengo', 'cartas_quiero')
         widgets = {
             'titulo': forms.TextInput(attrs={'class': 'form-control'}),
             'contenido': forms.Textarea(attrs={'class': 'form-control'}),
             'categoria': forms.Select(attrs={'class': 'form-control'}),
-            'resumen': forms.TextInput(attrs={'class': 'form-control'}),
             'cartas_tengo': forms.SelectMultiple(attrs={'class':'form-control'}),
             'cartas_quiero': forms.SelectMultiple(attrs={'class':'form-control'}),
         }
+
     def init(self, args, **kwargs):
         super(PostEditForm, self).init(args, **kwargs)
         self.fields['categoria'].widget.choices = CategoriaPost.objects.all().values_list('nombre', 'nombre')
@@ -99,23 +87,27 @@ class PostEditForm(forms.ModelForm):
 class MazoForm(forms.ModelForm):
     class Meta:
         model = Mazo
-        fields = ['nombre','descripcion','nota_promedio','id_estado']
+        fields = ('nombre','descripcion','nota_promedio','id_estado')
+        widgets = {
+            'nombre': forms.TextInput(attrs={'class': 'form-control'}),
+            'descripcion': forms.TextInput(attrs={'class': 'form-control'}),
+            'nota_promedio': forms.TextInput(attrs={'class': 'form-control'}),
+            'id_estado': forms.Select(attrs={'class':'form-control'}),
+        }
 
 class BanlistForm(forms.ModelForm):
     class Meta:
         model = Cartas_Banlist
-        fields = ('carta', 'edicion', 'restriccion')
+        fields = ('carta', 'restriccion')
         widgets = {
             'carta': forms.Select(attrs={'class':'form-control'}),
-            'edicion': forms.Select(attrs={'class':'form-control'}),
             'restriccion': forms.Select(attrs={'class':'form-control'}),
         }
 
 class EditBanlistForm(forms.ModelForm):
     class Meta:
         model = Cartas_Banlist
-        fields = ('carta', 'edicion', 'restriccion')
+        fields = ('carta', 'restriccion')
         widgets = {
             'carta': forms.Select(attrs={'class':'form-control'}),
-            'edicion': forms.Select(attrs={'class':'form-control'}),
             'restriccion': forms.Select(attrs={'class':'form-control'}),}

@@ -46,11 +46,13 @@ def ingresarCarta(request):
     if request.method == 'POST':
         form = RegistroCarta(request.POST)
         if form.is_valid():
-            form.save()
-            form = RegistroCarta()
-            return HttpResponseRedirect(reverse('tablaCartas')) #NO SÉ SI PONER RESPONSE
-    data = {'form': form}
-    return render(request, 'plataformaYugimon/formularioCartas.html', data)
+            carta = form.save(commit=False)
+            carta.id_usuario = request.user   # 👈 asignar usuario automáticamente
+            carta.save()
+            return HttpResponseRedirect(reverse('tablaCartas'))
+
+    return render(request, 'plataformaYugimon/formularioCartas.html', {'form': form})
+
 
 @user_passes_test(lambda u: u.is_superuser)
 def editarCarta(request, id):
@@ -107,16 +109,8 @@ class PublicacionCartaView(ListView):
 #Filtrar publicaciones por categoria
 @login_required
 def CategoriaView(request, categorias):
-    nombre_categoria = categorias.replace('-', ' ')
-    # CORRECCIÓN 2: Añadir prefetch_related para cargar cartas relacionadas
-    categoria_posts = Publicacion_intercambio.objects.filter(
-        categoria=nombre_categoria
-    ).prefetch_related('cartas_tengo', 'cartas_quiero') # <-- CORRECCIÓN APLICADA
-
-    return render(request, 'plataformaYugimon/categorias.html', {
-        'categorias': nombre_categoria.title(), 
-        'categoria_posts':categoria_posts
-    })
+    categoria_posts = Publicacion_intercambio.objects.filter(categoria__nombre=categorias.replace('-', ' '))
+    return render(request, 'plataformaYugimon/categorias.html', {'categorias':categorias.title().replace('-', ' '), 'categoria_posts':categoria_posts})
 
 #Vistas de publicaciones
 class PublicacionCartaDetail(DetailView):
@@ -150,17 +144,6 @@ class EliminarPostCarta(DeleteView):
     template_name = 'plataformaYugimon/publicacionesCartas.html'
     success_url = reverse_lazy('publicacionCarta')
     
-class CreacionMazo(CreateView):
-    model = Mazo
-    form_class = MazoForm
-    template_name = "plataformaYugimon/crearMazo.html"
-    success_url = reverse_lazy('crearMazo')
-
-    #Deja al usuario autenticado como autor por defecto
-    def form_valid(self, form):
-        form.instance.autor = self.request.user
-        return super().form_valid(form)
-
 class ListaCartas(ListView):
     model = Carta
     template_name = 'plataformaYugimon/crearMazo.html'
@@ -186,7 +169,9 @@ def crear_mazo(request):
     if request.method == "POST":
         form = MazoForm(request.POST)
         if form.is_valid():
-            mazo = form.save()
+            mazo = form.save(commit=False)
+            mazo.id_usuario = request.user   # 👈 asignar usuario automáticamente
+            mazo.save()
             return redirect('editar_mazo', mazo_id=mazo.id)
     else:
         form = MazoForm()
@@ -319,11 +304,18 @@ def eliminarMazo(request, mazo_id):
     return render(request, "plataformaYugimon/eliminarMazo.html", {
         "mazo": mazo
     })
+
 class CrearBanlist(CreateView):
     model = Cartas_Banlist
     form_class = BanlistForm
     template_name = "plataformaYugimon/agregarCartasBanlist.html"
     success_url = reverse_lazy('mostrarBanlist')
+
+    def form_valid(self, form):
+        carta_seleccionada = form.cleaned_data['carta']
+        form.instance.edicion = carta_seleccionada.id_edicion
+        return super().form_valid(form)
+
 
 class MostrarCartasBanlistView(TemplateView):
     template_name = 'plataformaYugimon/banlist.html'

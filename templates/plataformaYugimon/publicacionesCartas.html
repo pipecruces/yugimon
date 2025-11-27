@@ -1,5 +1,5 @@
 {% extends 'base/base.html' %}
-
+{% load static %}
 {% block titulo %}
     Publicaciones
 {% endblock %}
@@ -43,7 +43,60 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    {{ publicacion_intercambio.resumen}}
+                    <div class="row d-flex align-items-center justify-content-center">
+
+                        <div class="card col-12 col-lg-5" style="max-height: 400px; overflow-y: auto;">
+                            <div class="card-header">
+                                <h2>Tengo:</h2>
+                            </div>
+                            <div class="card-body d-flex justify-content-evenly gap-4 flex-wrap">
+                                {% if publicacion_intercambio.cartas_tengo.all %}
+                                    {% for carta in publicacion_intercambio.cartas_tengo.all %}
+                                        <div>
+                                            <div>
+                                                Nombre: {{ carta.nombre }}
+                                            </div>
+                                            <div>
+                                                <img src="{{ carta.ilustracion }}" alt="{{ carta.nombre }}" style="max-width: 150px;">
+                                            </div>
+                                            <div>
+                                                (Fuerza: {{ carta.fuerza }})
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p>Esta publicación no tiene cartas asociadas.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <img src="{% static 'img/trade.png' %}" alt="trade" style="width: 150px; height: 90px;">
+
+                        <div class="card col-12 col-lg-5" style="max-height: 400px; overflow-y: auto">
+                            <div class="card-header">
+                                <h2>Quiero:</h2>
+                            </div>
+                            <div class="card-body d-flex justify-content-evenly gap-4 flex-wrap">
+                                {% if publicacion_intercambio.cartas_quiero.all %}
+                                    {% for carta in publicacion_intercambio.cartas_quiero.all %}
+                                        <div>
+                                            <div>
+                                                Nombre: {{ carta.nombre }}
+                                            </div>
+                                            <div>
+                                                <img src="{{ carta.ilustracion }}" alt="{{ carta.nombre }}" style="max-width: 150px;">
+                                            </div>
+                                            <div>
+                                                (Fuerza: {{ carta.fuerza }})
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p>Esta publicación no tiene cartas asociadas.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="card-footer d-flex justify-content-between">

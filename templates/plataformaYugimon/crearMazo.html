@@ -1,11 +1,19 @@
 {% extends 'base/base.html' %}
 {% block contenido %}
-
-<h1>Crear mazo</h1>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Crear</button>
-</form>
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h1>Crear mazo</h1>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-success">Crear</button>
+                <a href="{% url 'listarMazos' %}" class="btn btn-danger"> Cancelar</a>
+            </form>
+        </div>
+    </div>
+</div>
 
 {% endblock %}

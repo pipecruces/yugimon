@@ -15,7 +15,7 @@ class Edicion(models.Model):
 class Restriccion(models.Model):
     nombre = models.CharField(max_length=50)
 
-    def _str_(self):
+    def __str__(self):
         return self.nombre
 
 class Tipo(models.Model):
@@ -48,12 +48,6 @@ class Rol(models.Model):
     def __str__(self):
         return self.nombre
 
-class Mazo(models.Model):
-    nombre = models.CharField(max_length=50)
-    descripcion = models.CharField(max_length=200)
-    nota_promedio = models.FloatField()
-    id_estado = models.ForeignKey(Estado, on_delete = models.CASCADE)
-
 #Usar email para iniciar sesion
 class Usuario(AbstractUser):
     email = models.EmailField(unique=True)
@@ -65,11 +59,12 @@ class Usuario(AbstractUser):
     def __str__(self):
         return self.username
 
-# class Usuario(models.Model):
-#     nombre = models.CharField(max_length=50)
-#     correo = models.CharField(max_length=50)
-#     contraseña = models.CharField(max_length=200)
-#     id_rol = models.ForeignKey(Rol, on_delete = models.CASCADE)
+class Mazo(models.Model):
+    nombre = models.CharField(max_length=50)
+    descripcion = models.CharField(max_length=200)
+    nota_promedio = models.FloatField()
+    id_estado = models.ForeignKey(Estado, on_delete = models.CASCADE)
+    id_usuario = models.ForeignKey(Usuario, on_delete = models.CASCADE)
 
 class Publicacion_venta(models.Model):
     descripcion = models.CharField(max_length=200)
@@ -103,7 +98,6 @@ class Publicacion_intercambio(models.Model):
     contenido = RichTextField(blank=True, null=True)
     fecha = models.DateTimeField(auto_now_add=True)
     categoria = models.ForeignKey(CategoriaPost, on_delete=models.CASCADE)
-    resumen = models.CharField(max_length=255)
     cartas_tengo = models.ManyToManyField('Carta', related_name='cartas_tengo', blank=True)
     cartas_quiero = models.ManyToManyField('Carta', related_name='cartas_quiero', blank=True)
 
@@ -144,3 +138,6 @@ class Cartas_Banlist(models.Model):
     carta = models.ForeignKey(Carta, on_delete = models.CASCADE)
     edicion = models.ForeignKey(Edicion, on_delete= models.CASCADE)
     restriccion = models.ForeignKey(Restriccion, on_delete=models.CASCADE)
+
+    
+
