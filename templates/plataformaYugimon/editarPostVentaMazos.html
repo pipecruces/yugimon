@@ -1,11 +1,11 @@
 {% extends 'base/base.html' %}
 
 {% block titulo %}
-    Edita tu publicación...
+    Edita tu publicación de venta de Mazo...
 {% endblock %}
 
 {% block contenido %}
-    {% if user.id != publicacion_venta.autor.id %}
+    {% if user.id != publicacion_venta.id_usuario.id %}
         <div class="alert alert-danger">
             <h1>Esta publicación fue creada por otro usuario</h1>
         </div>
@@ -24,7 +24,7 @@
                             {{form.as_p}}
                             <div class="d-flex justify-content-between">
                                 <button class="btn btn-success" type="submit">Guardar</button>
-                                <a class="btn btn-danger" href="{% url 'publicacionCarta' %}">Cancelar</a>
+                                <a class="btn btn-danger" href="{% url 'listarPublicacionesMazos' %}">Cancelar</a>
                             </div>
                         </form>
                     </div>

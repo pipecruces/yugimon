@@ -49,6 +49,15 @@ urlpatterns = [
     #Filtros de categoria
     path('publicacionCartas/<str:categorias>', CategoriaView, name='categoria'),
 
+    #Publicaciones de venta de mazos
+    
+    path('escribirPostVentaMazos/', login_required(EscribirPostVentaMazo.as_view()), name="escribirPostVentaMazos"),
+    path('publicacionesMazos/', login_required(PublicacionesMazosListView.as_view()), name='listarPublicacionesMazos'),
+    path('publicacionVentaMazos/<int:pk>/', login_required(PublicacionVentaMazoView.as_view()), name='detallesPublicacionVentaMazos'),
+    path('eliminarPostVentaMazos/<int:pk>', login_required(EliminarVentaMazos.as_view()), name="eliminarPostVentaMazos"),
+    path('editarPostVentaMazos/<int:pk>', login_required(EditarPostVentaMazos.as_view()), name="editarPostVentaMazos"),
+
+
     #CRUD MAZOS
     path('crearMazo/', crear_mazo, name='crearMazo'),
     path("mazo/<int:mazo_id>/editar/", editar_mazo, name="editar_mazo"),

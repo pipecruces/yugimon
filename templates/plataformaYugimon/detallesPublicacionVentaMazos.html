@@ -1,0 +1,129 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block titulo %}
+    Detalles de la Publicación
+{% endblock %}
+
+{% block contenido %}
+
+<div class="container mt-4">
+
+    <div class="alert alert-primary text-center">
+        <h1>{{ mazo.nombre }}</h1>
+    </div>
+
+    <!-- DATOS DE LA PUBLICACIÓN -->
+    <div class="accordion" id="acordeonPublicacion">
+        <div class="accordion-item">
+
+            <h2 class="accordion-header" id="headingDetalles">
+                <button class="accordion-button collapsed" type="button" 
+                        data-bs-toggle="collapse" data-bs-target="#collapseDetalles">
+                    Información de la Publicación
+                </button>
+            </h2>
+
+            <div id="collapseDetalles" class="accordion-collapse collapse show" 
+                data-bs-parent="#acordeonPublicacion">
+                <div class="accordion-body">
+
+                    <h4 class="card-title">Descripción publicación</h4>
+                    <p>{{ publicacion.descripcion }}</p>
+
+                    <p><strong>Publicado por:</strong> {{ publicacion.id_usuario.username }}</p>
+                    <p><strong>Fecha:</strong> {{ publicacion.fecha_publicacion }}</p>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <br>
+
+   <!-- DATOS DEL MAZO -->
+    <div class="accordion" id="acordeonMazo">
+        <div class="accordion-item">
+
+            <h2 class="accordion-header" id="headingOne">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#colapsarUno">
+                    Información del mazo
+                </button>
+            </h2>
+
+            <div id="colapsarUno" class="accordion-collapse collapse" data-bs-parent="#acordeonMazo">
+                <div class="accordion-body">
+                    <p><strong>Descripción:</strong> {{ mazo.descripcion }}</p>
+                    <p><strong>Nota promedio:</strong> {{ mazo.nota_promedio }}</p>
+                    <p><strong>Estado:</strong> {{ mazo.id_estado.nombre }}</p>
+                    <p><strong>Creador del mazo:</strong> {{ mazo.id_usuario.username }}</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <br>
+
+    <!-- CARTAS DEL MAZO -->
+    <div class="card">
+        <div class="card-header">
+            <h4>Cartas del Mazo</h4>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+
+                {% for item in cartas_mazo %}
+                    <div class="col-2 mb-3 text-center">
+                        <a href="" data-bs-toggle="modal" data-bs-target="#exampleModal{{item.id_carta.id}}">
+
+                            <img src="{{ item.id_carta.ilustracion }}"
+                                 class="img-thumbnail"
+                                 
+                                 alt="{{ item.id_carta.nombre }}">
+                        </a>
+                        <!-- Modal -->
+                        <div class="modal fade" id="exampleModal{{item.id_carta.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <img src="{{ item.id_carta.ilustracion }}" width="500" alt="{{item.id_carta.nombre}}">
+                            </div>
+                        </div>
+                        <p class="mt-1"><strong>{{ item.id_carta.nombre }}</strong></p>
+
+                    </div>
+                {% endfor %}
+
+            </div>
+
+        </div>
+        <div>
+            <a class="btn btn-primary" href="{% url 'editarPostVentaMazos' publicacion.pk %}">Editar📝</a> 
+            <a class="btn btn-danger" href="#" data-bs-toggle="modal" data-bs-target="#exampleModal{{publicacion.pk}}">Eliminar ❌ </a>
+        </div>
+        
+        <div class="modal fade" id="exampleModal{{publicacion.pk}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Eliminar Post</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Seguro que quieres eliminar el post: {{publicacion.titulo}}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        {% include 'base/base_postVenta.html' %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+<br>
+</div>
+
+{% endblock %}
