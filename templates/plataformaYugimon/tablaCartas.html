@@ -38,7 +38,18 @@
                         <td>{{carta.fuerza}}</td>
                         <td>{{carta.coste}}</td>
                         <td>{{carta.id_raza}}</td>
-                        <td>{{carta.ilustracion}}</td>
+                        <td>
+                            <a href="" data-bs-toggle="modal" data-bs-target="#exampleModal{{carta.id}}">
+                                <img src="{{ carta.ilustracion }}" 
+                                    alt="{{ carta.nombre }}" 
+                                    style="width: 60px; height: 80px; object-fit: cover; border-radius: 4px;">
+                            </a>
+                            <div class="modal fade" id="exampleModal{{carta.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <img src="{{ carta.ilustracion }}" width="500" alt="{{carta.nombre}}">
+                                </div>
+                            </div>
+                        </td>
                         <td>{{carta.id_edicion}}</td>
                         <td>{{carta.id_tipo}}</td>
                         <td>{{carta.id_usuario}}</td>

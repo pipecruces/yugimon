@@ -1,6 +1,6 @@
 from django import forms
 from plataformaYugimon.views import Carta
-from .models import Publicacion_intercambio, CategoriaPost, Usuario, Cartas_Banlist, Mazo
+from .models import Publicacion_intercambio, CategoriaPost, Usuario, Cartas_Banlist, Mazo, Publicacion_venta
 from django.core import validators
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, PasswordChangeForm
 from django.contrib.auth import get_user_model
@@ -29,17 +29,6 @@ class PasswordChangedForm(PasswordChangeForm):
         model = Usuario
         fields = ('old_password', 'new_password1', 'new_password2')
 
-# class RegistroUsuario(forms.Form):
-#     nombre = forms.CharField(max_length=50)
-#     correo = forms.CharField(max_length=50)
-#     contraseña = forms.CharField(max_length=200)
-
-# class RegistroUsuario(forms.ModelForm):
-#     class Meta:
-#         model = Usuario
-#         fields = '__all__'
-#     nombre = forms.CharField(validators=[validators.MinLengthValidator(3), validators.MaxLengthValidator(30)])
-
 class RegistroCarta(forms.ModelForm):
     class Meta:
         model = Carta
@@ -51,7 +40,6 @@ class RegistroMazo(forms.Form):
     nota_promedio = forms.FloatField()
     id_estado = forms.IntegerField()
 
-#Para darle formato a las publicaciones
 class PostForm(forms.ModelForm):
     class Meta:
         model = Publicacion_intercambio
@@ -111,3 +99,18 @@ class EditBanlistForm(forms.ModelForm):
         widgets = {
             'carta': forms.Select(attrs={'class':'form-control'}),
             'restriccion': forms.Select(attrs={'class':'form-control'}),}
+        
+class PostVentaMazoForm(forms.ModelForm):
+    class Meta:
+        model = Publicacion_venta
+        fields = ('titulo', 'descripcion', 'categoria', 'id_mazo',)
+        widgets = {
+            'titulo': forms.TextInput(attrs={'class': 'form-control'}),
+            'descripcion': forms.TextInput(attrs={'class': 'form-control'}),
+            'categoria': forms.Select(attrs={'class': 'form-control'}),
+            'id_mazo': forms.Select(attrs={'class': 'form-control'}),
+        }
+
+    def init(self, args, **kwargs):
+        super(PostVentaMazoForm, self).init(args, **kwargs)
+        self.fields['categoria'].widget.choices = CategoriaPost.objects.all().values_list('nombre', 'nombre')

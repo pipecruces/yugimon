@@ -23,11 +23,11 @@
                 {% if user.is_authenticated %}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Publicaciones
+                        Tablero de anuncios
                     </a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="{% url 'publicacionCarta' %}">Intercambio de Cartas</a></li>
-                        <li><a class="dropdown-item" href="#">Intercambio de Mazos</a></li>
+                        <li><a class="dropdown-item" href="{% url 'listarPublicacionesMazos' %}">Venta de Mazos</a></li>
                     </ul>
                 </li>
                 <li class="nav-item dropdown">

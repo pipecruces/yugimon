@@ -48,6 +48,15 @@ class Rol(models.Model):
     def __str__(self):
         return self.nombre
 
+class CategoriaPost(models.Model):
+    nombre = models.CharField(max_length=255)
+    def __str__(self):
+        return self.nombre
+    
+    def get_absolute_url(self):
+        return reverse('publicacionCartas')
+
+
 #Usar email para iniciar sesion
 class Usuario(AbstractUser):
     email = models.EmailField(unique=True)
@@ -66,11 +75,19 @@ class Mazo(models.Model):
     id_estado = models.ForeignKey(Estado, on_delete = models.CASCADE)
     id_usuario = models.ForeignKey(Usuario, on_delete = models.CASCADE)
 
+    def __str__(self):
+        return self.nombre
+
 class Publicacion_venta(models.Model):
+    titulo = models.CharField(max_length=255)
     descripcion = models.CharField(max_length=200)
-    fecha_publicacion = models.DateField()
+    fecha_publicacion = models.DateTimeField(auto_now_add=True)
+    categoria = models.ForeignKey(CategoriaPost, on_delete=models.CASCADE)
     id_mazo = models.ForeignKey(Mazo, on_delete = models.CASCADE)
     id_usuario = models.ForeignKey(Usuario, on_delete = models.CASCADE)
+
+    def __str__(self):
+        return self.descripcion + ' | ' + str(self.id_mazo)
 
 class Comentario(models.Model):
     descripcion = models.CharField(max_length=200)
@@ -82,15 +99,6 @@ class Usuario_notas(models.Model):
     nota_promedio = models.FloatField()
     id_mazo = models.ForeignKey(Mazo, on_delete = models.CASCADE)
     id_usuario = models.ForeignKey(Usuario, on_delete = models.CASCADE)
-
-
-class CategoriaPost(models.Model):
-    nombre = models.CharField(max_length=255)
-    def __str__(self):
-        return self.nombre
-    
-    def get_absolute_url(self):
-        return reverse('publicacionCartas')
 
 class Publicacion_intercambio(models.Model):
     titulo = models.CharField(max_length=255)
@@ -127,17 +135,16 @@ class Cartas_publicacion_intercambio(models.Model):
     id_carta = models.ForeignKey(Carta, on_delete = models.CASCADE)
 
 class Cartas_mazos(models.Model):
-    id_carta = models.ForeignKey(Carta, on_delete = models.CASCADE)
-    id_mazo = models.ForeignKey(Mazo, on_delete = models.CASCADE)
+    id_carta = models.ForeignKey(Carta, on_delete = models.CASCADE, related_name='rel_cartas')
+    id_mazo = models.ForeignKey(Mazo, on_delete = models.CASCADE, related_name= 'rel_mazos')
     cantidad = models.IntegerField(default=1)
-
-
-
 
 class Cartas_Banlist(models.Model):
     carta = models.ForeignKey(Carta, on_delete = models.CASCADE)
     edicion = models.ForeignKey(Edicion, on_delete= models.CASCADE)
     restriccion = models.ForeignKey(Restriccion, on_delete=models.CASCADE)
+
+    
 
     
 

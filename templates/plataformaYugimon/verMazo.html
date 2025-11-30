@@ -1,6 +1,6 @@
 {% extends 'base/base.html' %}
 {% block contenido %}
-
+{% load static %}
 <h1>{{ mazo.nombre }}</h1>
 <p>{{ mazo.descripcion }}</p>
 
@@ -11,17 +11,34 @@
         <tr>
             <th>Carta</th>
             <th>Cantidad</th>
+            <th>Ilustración</th>
         </tr>
     </thead>
     <tbody>
         {% for item in cartas %}
         <tr>
-            <td>{{ item.id_carta.nombre }}</td>
+            <!-- Nombre de la carta -->
+            <td>{{ item.nombre }}</td>
+
+            <!-- Cantidad total acumulada -->
             <td>{{ item.cantidad }}</td>
+
+            <!-- Imagen + Modal -->
+            <td>
+                <a href="#" data-bs-toggle="modal" data-bs-target="#exampleModal{{ item.id_carta }}">
+                    <img src="{{ item.ilustracion }}" alt="{{ item.nombre }}" style="width: 60px; height: 80px;">
+                </a>
+
+                <div class="modal fade" id="exampleModal{{ item.id_carta }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <img src="{{ item.ilustracion }}" width="500" alt="{{ item.nombre }}">
+                    </div>
+                </div>
+            </td>
         </tr>
         {% empty %}
         <tr>
-            <td colspan="2" class="text-center">El mazo está vacío.</td>
+            <td colspan="3" class="text-center">El mazo está vacío.</td>
         </tr>
         {% endfor %}
     </tbody>
