@@ -5,6 +5,7 @@ from django.urls import reverse, reverse_lazy
 from django.http import HttpResponseRedirect, request
 from django.views.generic import CreateView, ListView, DetailView, UpdateView, DeleteView, TemplateView
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.utils.decorators import method_decorator
 from django.views import generic
 from django.contrib.auth.views import PasswordChangeView
 from django.views.decorators.http import  require_POST
@@ -79,6 +80,7 @@ def tablaCartas(request):
     data = {'cartas': cartas}
     return render(request, 'plataformaYugimon/tablaCartas.html', data)
 
+@user_passes_test(lambda u: u.is_superuser)
 def crearBanlist(request):
     form = BanlistForm()
     if request.method == 'POST':
@@ -148,6 +150,7 @@ class ListaCartas(ListView):
     model = Carta
     template_name = 'plataformaYugimon/crearMazo.html'
 
+@login_required
 @require_POST
 def update_mazo(request):
     carta_id = request.POST.get("carta_id")
@@ -165,6 +168,7 @@ def update_mazo(request):
 
     return redirect("editar_mazo", mazo_id=mazo_id)
 
+@login_required
 def crear_mazo(request):
     if request.method == "POST":
         form = MazoForm(request.POST)
@@ -176,8 +180,9 @@ def crear_mazo(request):
     else:
         form = MazoForm()
 
-    return render(request, "plataformaYugimon/crearmazo.html", {'form':form})
+    return render(request, "plataformaYugimon/crearMazo.html", {'form':form})
 
+@login_required
 def editar_mazo(request, mazo_id):
     mazo = Mazo.objects.get(id=mazo_id)
     cartas = Carta.objects.all()
@@ -195,7 +200,7 @@ def editar_mazo(request, mazo_id):
 
     return render(request, 'plataformaYugimon/editarMazo.html', context)
 
-
+@login_required
 @require_POST
 def update_mazo_ajax(request):
     data = json.loads(request.body)
@@ -276,24 +281,37 @@ class CartaView(ListView):
     model = Carta
     template_name = 'plataformaYugimon/ListaCartas.html'
 
+@login_required
 def listarMazos(request):
     mazos = Mazo.objects.all().order_by('-id')
     return render(request, "plataformaYugimon/listarMazos.html", {
         "mazos": mazos
     })
 
+@login_required
 def verMazo(request, mazo_id):
     mazo = Mazo.objects.get(id=mazo_id)
     cartas = Cartas_mazos.objects.filter(id_mazo=mazo)
 
     total = sum(c.cantidad for c in cartas)
 
+    sort_order = request.GET.get('sort', '-fecha')
+    allowed_sorts = {
+        '-fecha': '-fecha',  
+        'fecha': 'fecha',
+    }
+    sort_field = allowed_sorts.get(sort_order, '-fecha')
+    comentarios_ordenados = mazo.comentarios.all().order_by(sort_field)
+
     return render(request, "plataformaYugimon/verMazo.html", {
         "mazo": mazo,
         "cartas": cartas,
         "total": total,
+        "comentarios_ordenados": comentarios_ordenados,
+        "current_sort": sort_order,
     })
 
+@login_required
 def eliminarMazo(request, mazo_id):
     mazo = get_object_or_404(Mazo, id=mazo_id)
 
@@ -305,6 +323,7 @@ def eliminarMazo(request, mazo_id):
         "mazo": mazo
     })
 
+@method_decorator(user_passes_test(lambda u: u.is_superuser), name='dispatch')
 class CrearBanlist(CreateView):
     model = Cartas_Banlist
     form_class = BanlistForm
@@ -352,3 +371,71 @@ class MostrarCartasBanlistView(TemplateView):
         context['banlist_por_edicion'] = banlist_agrupada
 
         return context
+
+class CrearComentario(CreateView):
+    model = Comentario
+    form_class = ComentarioForm
+    template_name = 'plataformaYugimon/crearComentario.html'
+
+    def form_valid(self, form):
+        form.instance.mazo_id = self.kwargs['pk']
+        form.instance.autor = self.request.user
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        return reverse_lazy('verMazo', kwargs={'mazo_id': self.kwargs['pk']})
+    
+class EditarComentario(UpdateView):
+    model = Comentario
+    template_name = "plataformaYugimon/editarComentario.html"
+    form_class = ComentarioForm
+    def get_success_url(self):
+        mazo_id = self.object.mazo.id
+        return reverse_lazy('verMazo', kwargs={'mazo_id': mazo_id})
+
+class EliminarComentario(DeleteView):
+    model = Comentario
+    template_name = 'plataformaYugimon/verMazo.html'
+    def get_success_url(self):
+        mazo_id = self.object.mazo.id
+        return reverse_lazy('verMazo', kwargs={'mazo_id': mazo_id})
+
+
+class CrearRespuestaComentario(CreateView):
+    model = RespuestaComentario
+    form_class = RespuestaComentarioForm
+    template_name = 'plataformaYugimon/crearComentario.html'
+
+    def form_valid(self, form):
+        comentario = get_object_or_404(Comentario, pk=self.kwargs['pk'])
+        form.instance.comentario = comentario
+        form.instance.autor = self.request.user
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        comentario = get_object_or_404(Comentario, pk=self.kwargs['pk'])
+        mazo_id = comentario.mazo.id
+        return reverse_lazy('verMazo', kwargs={'mazo_id': mazo_id})
+    
+class EditarRespuestaComentario(UpdateView):
+    model = RespuestaComentario
+    template_name = "plataformaYugimon/editarComentario.html"
+    form_class = RespuestaComentarioForm
+    def get_success_url(self):
+        mazo_id = self.object.comentario.mazo.id 
+        return reverse_lazy('verMazo', kwargs={'mazo_id': mazo_id})
+
+class EliminarRespuestaComentario(DeleteView):
+    model = RespuestaComentario
+    template_name = 'plataformaYugimon/verMazo.html'
+    def get_success_url(self):
+        mazo_id = self.object.comentario.mazo.id 
+        return reverse_lazy('verMazo', kwargs={'mazo_id': mazo_id})
+    
+
+@login_required
+def misMazos(request):
+    usuario_logueado = request.user
+    mazos = Mazo.objects.filter(id_usuario=usuario_logueado)
+    data = {'mazos': mazos}
+    return render(request, 'plataformaYugimon/listarMazos.html', data)

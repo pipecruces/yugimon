@@ -1,6 +1,6 @@
 from django import forms
 from plataformaYugimon.views import Carta
-from .models import Publicacion_intercambio, CategoriaPost, Usuario, Cartas_Banlist, Mazo
+from .models import Publicacion_intercambio, CategoriaPost, Usuario, Cartas_Banlist, Mazo, Comentario, RespuestaComentario
 from django.core import validators
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, PasswordChangeForm
 from django.contrib.auth import get_user_model
@@ -111,3 +111,19 @@ class EditBanlistForm(forms.ModelForm):
         widgets = {
             'carta': forms.Select(attrs={'class':'form-control'}),
             'restriccion': forms.Select(attrs={'class':'form-control'}),}
+
+class ComentarioForm(forms.ModelForm):
+    class Meta:
+        model = Comentario
+        fields = ('contenido',)
+        widgets = {
+            'contenido': forms.Textarea(attrs={'class':'form-control'})
+            }
+        
+class RespuestaComentarioForm(forms.ModelForm):
+    class Meta:
+        model = RespuestaComentario
+        fields = ('contenido',)
+        widgets = {
+            'contenido': forms.Textarea(attrs={'class':'form-control'})
+            }

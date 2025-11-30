@@ -66,6 +66,9 @@ class Mazo(models.Model):
     id_estado = models.ForeignKey(Estado, on_delete = models.CASCADE)
     id_usuario = models.ForeignKey(Usuario, on_delete = models.CASCADE)
 
+    def __str__(self):
+        return self.nombre
+
 class Publicacion_venta(models.Model):
     descripcion = models.CharField(max_length=200)
     fecha_publicacion = models.DateField()
@@ -73,10 +76,13 @@ class Publicacion_venta(models.Model):
     id_usuario = models.ForeignKey(Usuario, on_delete = models.CASCADE)
 
 class Comentario(models.Model):
-    descripcion = models.CharField(max_length=200)
-    fecha_publicacion = models.DateField()
-    id_mazo = models.ForeignKey(Mazo, on_delete = models.CASCADE)
-    id_usuario = models.ForeignKey(Usuario, on_delete = models.CASCADE)
+    mazo = models.ForeignKey(Mazo, related_name="comentarios", on_delete=models.CASCADE)
+    autor = models.ForeignKey(Usuario, on_delete=models.CASCADE)
+    contenido = RichTextField(blank=True, null=True)
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return '%s - %s' % (self.mazo.nombre, self.autor)
 
 class Usuario_notas(models.Model):
     nota_promedio = models.FloatField()
@@ -139,5 +145,15 @@ class Cartas_Banlist(models.Model):
     edicion = models.ForeignKey(Edicion, on_delete= models.CASCADE)
     restriccion = models.ForeignKey(Restriccion, on_delete=models.CASCADE)
 
-    
 
+class RespuestaComentario(models.Model):
+    comentario = models.ForeignKey(Comentario, related_name="respuestas", on_delete=models.CASCADE)
+    autor = models.ForeignKey(Usuario, on_delete=models.CASCADE)
+    contenido = RichTextField(blank=True, null=True)
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-fecha']
+
+    def __str__(self):
+        return '%s - %s' % (self.comentario.autor, self.autor)
