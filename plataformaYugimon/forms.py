@@ -87,11 +87,10 @@ class PostEditForm(forms.ModelForm):
 class MazoForm(forms.ModelForm):
     class Meta:
         model = Mazo
-        fields = ('nombre','descripcion','nota_promedio','id_estado')
+        fields = ('nombre','descripcion','id_estado')
         widgets = {
             'nombre': forms.TextInput(attrs={'class': 'form-control'}),
             'descripcion': forms.TextInput(attrs={'class': 'form-control'}),
-            'nota_promedio': forms.TextInput(attrs={'class': 'form-control'}),
             'id_estado': forms.Select(attrs={'class':'form-control'}),
         }
 

@@ -11,6 +11,7 @@ from django.contrib.auth.views import PasswordChangeView
 from django.views.decorators.http import  require_POST
 from django.http import JsonResponse
 import json
+from django.db.models import Avg
 # Create your views here.
 
 class PasswordsChangeView(PasswordChangeView):
@@ -283,17 +284,67 @@ class CartaView(ListView):
 
 @login_required
 def listarMazos(request):
-    mazos = Mazo.objects.all().order_by('-id')
+    mazos = Mazo.objects.all().annotate(
+        promedio_estrellas=Avg('puntuacionmazo__estrellas') 
+    ).order_by('-id')
+    
+    for mazo in mazos:
+        if mazo.promedio_estrellas is not None:
+            mazo.puntuacion_promedio = round(mazo.promedio_estrellas, 2)
+        else:
+            mazo.puntuacion_promedio = '-'
     return render(request, "plataformaYugimon/listarMazos.html", {
         "mazos": mazos
     })
 
 @login_required
 def verMazo(request, mazo_id):
-    mazo = Mazo.objects.get(id=mazo_id)
+    mazo = get_object_or_404(Mazo, id=mazo_id)
+
+    #Genera un promedio de todas las puntuaciones de un mazo y lo retorna
+    if request.method == 'POST':
+        estrellas = request.POST.get('val')
+        
+        if estrellas:
+            estrellas_num = int(estrellas)
+            if 1 <= estrellas_num <= 5:
+                PuntuacionMazo.objects.update_or_create(
+                    mazo=mazo,
+                    usuario=request.user, 
+                    defaults={'estrellas': estrellas_num}
+                )
+                nuevo_promedio = PuntuacionMazo.objects.filter(mazo=mazo).aggregate(Avg('estrellas')).get('estrellas__avg')
+                
+                if nuevo_promedio is not None:
+                    promedio_formateado = round(nuevo_promedio, 2)
+                else:
+                    promedio_formateado = None
+
+                return JsonResponse({
+                    'success': True, 
+                    'message': 'Puntuación guardada con éxito.',
+                    'promedio_estrellas': promedio_formateado
+                })
+
+    #Guarda la cantidad de estrellas seleccionada por el usuario
+    puntuacion_usuario = 0
+    try:
+        voto_existente = PuntuacionMazo.objects.get(mazo=mazo, usuario=request.user)
+        puntuacion_usuario = voto_existente.estrellas
+    except PuntuacionMazo.DoesNotExist:
+        puntuacion_usuario = 0
+
     cartas = Cartas_mazos.objects.filter(id_mazo=mazo)
 
     total = sum(c.cantidad for c in cartas)
+
+    promedio_puntuacion = PuntuacionMazo.objects.filter(mazo=mazo).aggregate(Avg('estrellas'))
+    promedio_estrellas = promedio_puntuacion.get('estrellas__avg')
+
+    if promedio_estrellas is not None:
+        promedio_formateado = round(promedio_estrellas, 2) 
+    else:
+        promedio_formateado = None
 
     sort_order = request.GET.get('sort', '-fecha')
     allowed_sorts = {
@@ -309,6 +360,8 @@ def verMazo(request, mazo_id):
         "total": total,
         "comentarios_ordenados": comentarios_ordenados,
         "current_sort": sort_order,
+        "promedio_estrellas": promedio_formateado,
+        "puntuacion_usuario": puntuacion_usuario,
     })
 
 @login_required

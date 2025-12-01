@@ -1,6 +1,7 @@
 from django.db import models
 from django.urls import reverse
 from ckeditor.fields import RichTextField
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 #Usar email para iniciar sesion
 from django.contrib.auth.models import AbstractUser
@@ -62,12 +63,27 @@ class Usuario(AbstractUser):
 class Mazo(models.Model):
     nombre = models.CharField(max_length=50)
     descripcion = models.CharField(max_length=200)
-    nota_promedio = models.FloatField()
     id_estado = models.ForeignKey(Estado, on_delete = models.CASCADE)
     id_usuario = models.ForeignKey(Usuario, on_delete = models.CASCADE)
 
     def __str__(self):
         return self.nombre
+    
+class PuntuacionMazo(models.Model):
+    mazo = models.ForeignKey(Mazo, on_delete=models.CASCADE)
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, default=1)
+    estrellas = models.IntegerField(default=0,
+        validators=[
+            MaxValueValidator(5),
+            MinValueValidator(0),
+        ]                                
+    )
+    class Meta:
+        unique_together = ('mazo', 'usuario')
+
+    def __str__(self):
+        return f"Mazo: {self.mazo.nombre} - Puntuado por: {self.usuario.username} con {self.estrellas} estrellas"
+    
 
 class Publicacion_venta(models.Model):
     descripcion = models.CharField(max_length=200)

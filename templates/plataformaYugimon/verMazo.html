@@ -1,4 +1,5 @@
 {% extends 'base/base.html' %}
+{% load static %}
 {% block contenido %}
 
 <h1>{{ mazo.nombre }}</h1>
@@ -28,11 +29,34 @@
         {% endfor %}
     </tbody>
 </table>
-
-<a href="{% url 'editar_mazo' mazo.id %}" class="btn btn-warning mt-3">Editar Mazo</a>
-<a href="{% url 'listarMazos' %}" class="btn btn-secondary mt-3">Volver</a>
-<a href="{% url 'eliminarMazo' mazo.id %}" class="btn btn-danger mt-3">Eliminar Mazo</a>
-<br/>
+<div class="d-flex justify-content-between">
+    <div class="d-flex">
+        <a href="{% url 'editar_mazo' mazo.id %}" class="btn btn-warning mt-3">Editar Mazo</a>
+        <a href="{% url 'listarMazos' %}" class="btn btn-secondary mt-3">Volver</a>
+        <a href="{% url 'eliminarMazo' mazo.id %}" class="btn btn-danger mt-3">Eliminar Mazo</a>
+    </div>
+    <div class="d-flex">
+        <div class="d-flex justify-content-between">
+            <div class="d-flex align-items-center">
+                <form class="rate-form" action="" method="post" id="{{mazo.id}}" data-rate-url="{% url 'verMazo' mazo.id %}" data-initial-rating="{{ puntuacion_usuario }}">
+                    {% csrf_token %}
+                    <button type="submit" class="fa fa-star fa-2x btn-estrellas" id="primera"></button>
+                    <button type="submit" class="fa fa-star fa-2x btn-estrellas" id="segunda"></button>
+                    <button type="submit" class="fa fa-star fa-2x btn-estrellas" id="tercera"></button>
+                    <button type="submit" class="fa fa-star fa-2x btn-estrellas" id="cuarta"></button>
+                    <button type="submit" class="fa fa-star fa-2x btn-estrellas" id="quinta"></button>
+                </form>
+            </div>
+            <div class="d-flex align-items-center ms-3">
+                {% if promedio_estrellas is not None %}
+                    <h4 class="mb-0">{{ promedio_estrellas }} <small class="text-muted">/ 5</small></h4>
+                {% else %}
+                    <h4 class="mb-0">- <small class="text-muted">/ 5</small></h4>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
 <br/>
 <hr>
 

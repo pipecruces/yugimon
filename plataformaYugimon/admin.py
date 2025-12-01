@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import Usuario, Publicacion_intercambio, CategoriaPost, Carta, Comentario, Mazo
+from .models import Usuario, Publicacion_intercambio, CategoriaPost, Carta, Comentario, Mazo, PuntuacionMazo
 # Register your models here.
 
 # Permite agregar usuarios con todos los campos necesarios desde el panel de admin
@@ -21,3 +21,4 @@ admin.site.register(CategoriaPost)
 admin.site.register(Carta)
 admin.site.register(Mazo)
 admin.site.register(Comentario)
+admin.site.register(PuntuacionMazo)

@@ -12,6 +12,7 @@
             <th>Nombre</th>
             <th>Descripción</th>
             <th>Autor</th>
+            <th>Puntuación</th>
             <th>Acciones</th>
         </tr>
     </thead>
@@ -22,6 +23,7 @@
             <td>{{ mazo.nombre }}</td>
             <td>{{ mazo.descripcion }}</td>
             <td>{{ mazo.id_usuario.username }}</td>
+            <td>{{ mazo.puntuacion_promedio }}/5</td>
             <td>
                 {% if request.user.is_authenticated and request.user.id == mazo.id_usuario_id %}
                 <a href="{% url 'editar_mazo' mazo.id %}" class="btn btn-warning btn-sm">Editar</a>
