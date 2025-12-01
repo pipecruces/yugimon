@@ -99,18 +99,9 @@ class PublicacionCartaView(ListView):
     ordering = ['-fecha']
 
     def get_context_data(self, *args, **kwargs):
-        categoria_menu = CategoriaPost.objects.all()
         context = super(PublicacionCartaView, self).get_context_data(*args, **kwargs)
-        context['categoria_menu'] = categoria_menu
-        
         context['object_list'] = self.model.objects.all().prefetch_related('cartas_tengo', 'cartas_quiero').order_by(*self.ordering)
         return context
-
-#Filtrar publicaciones por categoria
-@login_required
-def CategoriaView(request, categorias):
-    categoria_posts = Publicacion_intercambio.objects.filter(categoria__nombre=categorias.replace('-', ' '))
-    return render(request, 'plataformaYugimon/categorias.html', {'categorias':categorias.title().replace('-', ' '), 'categoria_posts':categoria_posts})
 
 #Vistas de publicaciones
 class PublicacionCartaDetail(DetailView):
@@ -419,6 +410,13 @@ class MostrarCartasBanlistView(TemplateView):
 
         return context
 
+@method_decorator(user_passes_test(lambda u: u.is_superuser), name='dispatch')
+class editarBanlist(DeleteView):
+    model = Cartas_Banlist
+    template_name = 'plataformaYugimon/banlist.html'
+    success_url = reverse_lazy('mostrarBanlist')
+
+
 class PublicacionesMazosListView(ListView):
     model = Publicacion_venta
     template_name = 'plataformaYugimon/publicacionesMazos.html' 
@@ -426,7 +424,7 @@ class PublicacionesMazosListView(ListView):
     ordering = ['-fecha_publicacion']
 
     def get_queryset(self):
-        return Publicacion_venta.objects.select_related('id_mazo').all()
+        return Publicacion_venta.objects.select_related('id_mazo').all().order_by(*self.ordering)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -437,11 +435,6 @@ class PublicacionesMazosListView(ListView):
             pub.cartas = Cartas_mazos.objects.filter(id_mazo=pub.id_mazo).select_related('id_carta')
 
         return context
-
-@login_required
-def CategoriaView(request, categorias):
-    categoria_posts = Publicacion_intercambio.objects.filter(categoria__nombre=categorias.replace('-', ' '))
-    return render(request, 'plataformaYugimon/categorias.html', {'categorias':categorias.title().replace('-', ' '), 'categoria_posts':categoria_posts})
 
 class PublicacionVentaMazoView(DetailView):
     model = Publicacion_venta
@@ -454,11 +447,19 @@ class PublicacionVentaMazoView(DetailView):
 
         publicacion = self.object
         mazo = publicacion.id_mazo
+        promedio_puntuacion = PuntuacionMazo.objects.filter(mazo=mazo).aggregate(Avg('estrellas'))
+        promedio_estrellas = promedio_puntuacion.get('estrellas__avg')
+
+        if promedio_estrellas is not None:
+            puntuacion_promedio = round(promedio_estrellas, 2)
+        else:
+            puntuacion_promedio = '-'
 
         cartas_mazo = Cartas_mazos.objects.filter(id_mazo=mazo).select_related('id_carta')
 
         context['mazo'] = mazo
         context['cartas_mazo'] = cartas_mazo
+        context['puntuacion_promedio'] = puntuacion_promedio
 
         return context
 
@@ -483,6 +484,7 @@ class EditarPostVentaMazos(UpdateView):
     
     form_class = PostVentaMazoForm
     success_url = reverse_lazy('listarPublicacionesMazos')
+
 class CrearComentario(CreateView):
     model = Comentario
     form_class = ComentarioForm
@@ -547,6 +549,15 @@ class EliminarRespuestaComentario(DeleteView):
 @login_required
 def misMazos(request):
     usuario_logueado = request.user
-    mazos = Mazo.objects.filter(id_usuario=usuario_logueado)
-    data = {'mazos': mazos}
-    return render(request, 'plataformaYugimon/listarMazos.html', data)
+    mazos = Mazo.objects.filter(id_usuario=usuario_logueado).annotate(
+        promedio_estrellas=Avg('puntuacionmazo__estrellas') 
+    ).order_by('-id')
+    
+    for mazo in mazos:
+        if mazo.promedio_estrellas is not None:
+            mazo.puntuacion_promedio = round(mazo.promedio_estrellas, 2)
+        else:
+            mazo.puntuacion_promedio = '-'
+    return render(request, "plataformaYugimon/listarMazos.html", {
+        "mazos": mazos
+    })

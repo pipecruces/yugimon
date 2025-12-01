@@ -55,7 +55,7 @@
             <div id="colapsarUno" class="accordion-collapse collapse" data-bs-parent="#acordeonMazo">
                 <div class="accordion-body">
                     <p><strong>Descripción:</strong> {{ mazo.descripcion }}</p>
-                    <p><strong>Nota promedio:</strong> {{ mazo.nota_promedio }}</p>
+                    <p><strong>Nota promedio:</strong> {{ puntuacion_promedio }} /5</p>
                     <p><strong>Estado:</strong> {{ mazo.id_estado.nombre }}</p>
                     <p><strong>Creador del mazo:</strong> {{ mazo.id_usuario.username }}</p>
                 </div>
@@ -99,28 +99,30 @@
             </div>
 
         </div>
-        <div>
-            <a class="btn btn-primary" href="{% url 'editarPostVentaMazos' publicacion.pk %}">Editar📝</a> 
-            <a class="btn btn-danger" href="#" data-bs-toggle="modal" data-bs-target="#exampleModal{{publicacion.pk}}">Eliminar ❌ </a>
-        </div>
-        
-        <div class="modal fade" id="exampleModal{{publicacion.pk}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="exampleModalLabel">Eliminar Post</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        Seguro que quieres eliminar el post: {{publicacion.titulo}}
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                        {% include 'base/base_postVenta.html' %}
+        {% if user.id == publicacion.id_usuario.id %}
+            <div>
+                <a class="btn btn-primary" href="{% url 'editarPostVentaMazos' publicacion.pk %}">Editar📝</a> 
+                <a class="btn btn-danger" href="#" data-bs-toggle="modal" data-bs-target="#exampleModal{{publicacion.pk}}">Eliminar ❌ </a>
+            </div>
+            
+            <div class="modal fade" id="exampleModal{{publicacion.pk}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="exampleModalLabel">Eliminar Post</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Seguro que quieres eliminar el post: {{publicacion.titulo}}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                            {% include 'base/base_postVenta.html' %}
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        {% endif %}
 
     </div>
 <br>

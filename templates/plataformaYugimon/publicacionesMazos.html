@@ -12,20 +12,7 @@
             <h1>Publicaciones de Venta de Mazos</h1>
         </div>
 
-        <div class="dropdown">
-            <a class="btn btn-success" href="{% url 'escribirPostVentaMazos' %}">Crear Publicación</a>
-        
-            {% if categoria_menu %}
-                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Categorias
-                </button>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    {% for item in categoria_menu %}
-                        <a class="dropdown-item" href="{% url 'categoria' item|slugify %}">{{ item }}</a>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        </div>
+        <a class="btn btn-success" href="{% url 'escribirPostVentaMazos' %}">Crear Publicación</a>
 
 
         <hr>
@@ -35,10 +22,19 @@
             <div class="col-12">
                 <div class="card mb-3">
 
+                    <div class="card-header d-flex justify-content-between">
+                        <div class="d-flex align-items-center">
+                            {{pub.titulo}}
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i>Publicado hace:  {{ pub.fecha_publicacion|timesince }} </i>
+                        </div>
+                    </div>
                     <div class="card-body">
-            
+
                         <p><strong>Mazo:</strong> {{ pub.id_mazo.nombre }}</p>
                         <p><strong>Publicado por:</strong> {{ pub.id_usuario.username }}</p>
+                        
                         
                         <div class="row mt-3" style="overflow-x: auto; white-space: nowrap;">
 

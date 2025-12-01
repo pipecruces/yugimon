@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block contenido %}
-    {% if user.id != publicacion_venta.autor.id %}
+    {% if user.id != publicacion_intercambio.autor.id %}
         <div class="alert alert-danger">
             <h1>Esta publicación fue creada por otro usuario</h1>
         </div>

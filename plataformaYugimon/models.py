@@ -49,14 +49,6 @@ class Rol(models.Model):
     def __str__(self):
         return self.nombre
 
-class CategoriaPost(models.Model):
-    nombre = models.CharField(max_length=255)
-    def __str__(self):
-        return self.nombre
-    
-    def get_absolute_url(self):
-        return reverse('publicacionCartas')
-
 
 #Usar email para iniciar sesion
 class Usuario(AbstractUser):
@@ -98,7 +90,6 @@ class Publicacion_venta(models.Model):
     titulo = models.CharField(max_length=255)
     descripcion = models.CharField(max_length=200)
     fecha_publicacion = models.DateTimeField(auto_now_add=True)
-    categoria = models.ForeignKey(CategoriaPost, on_delete=models.CASCADE)
     id_mazo = models.ForeignKey(Mazo, on_delete = models.CASCADE)
     id_usuario = models.ForeignKey(Usuario, on_delete = models.CASCADE)
 
@@ -124,7 +115,6 @@ class Publicacion_intercambio(models.Model):
     autor = models.ForeignKey(Usuario, on_delete = models.CASCADE)
     contenido = RichTextField(blank=True, null=True)
     fecha = models.DateTimeField(auto_now_add=True)
-    categoria = models.ForeignKey(CategoriaPost, on_delete=models.CASCADE)
     cartas_tengo = models.ManyToManyField('Carta', related_name='cartas_tengo', blank=True)
     cartas_quiero = models.ManyToManyField('Carta', related_name='cartas_quiero', blank=True)
 
@@ -159,9 +149,9 @@ class Cartas_mazos(models.Model):
     cantidad = models.IntegerField(default=1)
 
 class Cartas_Banlist(models.Model):
-    carta = models.ForeignKey(Carta, on_delete = models.CASCADE)
-    edicion = models.ForeignKey(Edicion, on_delete= models.CASCADE)
-    restriccion = models.ForeignKey(Restriccion, on_delete=models.CASCADE)
+    carta = models.ForeignKey(Carta, on_delete = models.CASCADE, null=True)
+    edicion = models.ForeignKey(Edicion, on_delete= models.CASCADE, null=True)
+    restriccion = models.ForeignKey(Restriccion, on_delete=models.CASCADE, null=True)
 
 
 class RespuestaComentario(models.Model):

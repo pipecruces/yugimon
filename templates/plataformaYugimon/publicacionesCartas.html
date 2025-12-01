@@ -12,20 +12,9 @@
             <h1>Publicaciones de Intercambio</h1>
         </div>
 
-        <div class="dropdown">
-            <a class="btn btn-success" href="{% url 'postCarta' %}">Crear Publicación</a>
-        
-            {% if categoria_menu %}
-                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Categorias
-                </button>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    {% for item in categoria_menu %}
-                        <a class="dropdown-item" href="{% url 'categoria' item|slugify %}">{{ item }}</a>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        </div>
+
+        <a class="btn btn-success" href="{% url 'postCarta' %}">Crear Publicación</a>
+
 
 
         <hr>
@@ -55,7 +44,7 @@
                                         {% for carta in publicacion_intercambio.cartas_tengo.all %}
                                             <div>
                                                 <div>
-                                                    Nombre: {{ carta.nombre }}
+                                                    {{ carta.nombre }}
                                                 </div>
                                                 <div>
                                                     <img src="{{ carta.ilustracion }}" alt="{{ carta.nombre }}" style="max-width: 150px;">
@@ -82,7 +71,7 @@
                                         {% for carta in publicacion_intercambio.cartas_quiero.all %}
                                             <div>
                                                 <div>
-                                                    Nombre: {{ carta.nombre }}
+                                                    {{ carta.nombre }}
                                                 </div>
                                                 <div>
                                                     <img src="{{ carta.ilustracion }}" alt="{{ carta.nombre }}" style="max-width: 150px;">
@@ -101,9 +90,6 @@
                     </div>
                     
                     <div class="card-footer d-flex justify-content-between">
-                        <div>
-                            <small>Categoria: <a href="{% url 'categoria' publicacion_intercambio.categoria %}"> {{ publicacion_intercambio.categoria }} </a></small>
-                        </div>
                         {% if user.id == publicacion_intercambio.autor.id %}
                             <div>
                                 <a class="btn btn-primary" href="{% url 'editarPostCarta' publicacion_intercambio.pk %}">Editar📝</a> 

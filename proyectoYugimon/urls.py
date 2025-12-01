@@ -33,7 +33,8 @@ urlpatterns = [
 
     #Crud Banlist ****
     path('mostrarBanlist/', MostrarCartasBanlistView.as_view(), name='mostrarBanlist'),
-    path('agregarBanlist/', CrearBanlist.as_view(), name='agregarCartasBanlist'),
+    path('agregarBanlist/', login_required(CrearBanlist.as_view()), name='agregarCartasBanlist'),
+    path('editarBanlist/<int:pk>', login_required(editarBanlist.as_view()), name='editarBanlist'),
 
     #Autenticación y home
     path('accounts/', include('django.contrib.auth.urls')),
@@ -46,8 +47,6 @@ urlpatterns = [
     path('escribirPostCarta/', login_required(EscribirPostCarta.as_view()), name="postCarta"),
     path('editarPostCarta/<int:pk>', login_required(EditarPostCarta.as_view()), name="editarPostCarta"),
     path('eliminarPostCarta/<int:pk>', login_required(EliminarPostCarta.as_view()), name="eliminarPostCarta"),
-    #Filtros de categoria
-    path('publicacionCartas/<str:categorias>', CategoriaView, name='categoria'),
 
     #Publicaciones de venta de mazos
     
