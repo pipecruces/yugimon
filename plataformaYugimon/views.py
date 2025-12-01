@@ -166,7 +166,7 @@ def crear_mazo(request):
         form = MazoForm(request.POST)
         if form.is_valid():
             mazo = form.save(commit=False)
-            mazo.id_usuario = request.user   # 👈 asignar usuario automáticamente
+            mazo.id_usuario = request.user 
             mazo.save()
             return redirect('editar_mazo', mazo_id=mazo.id)
     else:
