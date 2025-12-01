@@ -65,7 +65,16 @@ urlpatterns = [
     path("mazo/update/ajax/", update_mazo_ajax, name="update_mazo_ajax"),
     path('verCartas', CartaView.as_view(), name="verCartas"),
     path("mazos/", listarMazos, name="listarMazos"),
+    path("misMazos/", misMazos, name="misMazos"),
     path("mazo/<int:mazo_id>/ver/", verMazo, name="verMazo"),
     path("mazo/<int:mazo_id>/eliminar/", eliminarMazo, name="eliminarMazo"),
 
+    #Comentarios
+    path('mazo/<int:pk>/ver/crearComentario', login_required(CrearComentario.as_view()), name="comentario"),
+    path('editarComentario/<int:pk>/', login_required(EditarComentario.as_view()), name="editarComentario"),
+    path('eliminarComentario/<int:pk>/', login_required(EliminarComentario.as_view()), name="eliminarComentario"),
+
+    path('comentario/<int:pk>/responder/', login_required(CrearRespuestaComentario.as_view()), name="responderComentario"),
+    path('editarRespuesta/<int:pk>/', login_required(EditarRespuestaComentario.as_view()), name="editarRespuesta"),
+    path('eliminarRespuesta/<int:pk>/', login_required(EliminarRespuestaComentario.as_view()), name="eliminarRespuesta"),
 ]

@@ -5,12 +5,14 @@ from django.urls import reverse, reverse_lazy
 from django.http import HttpResponseRedirect, request
 from django.views.generic import CreateView, ListView, DetailView, UpdateView, DeleteView, TemplateView
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.utils.decorators import method_decorator
 from django.views import generic
 from django.contrib.auth.views import PasswordChangeView
 from django.views.decorators.http import  require_POST
 from django.http import JsonResponse
 import json
-from django.db.models import Sum, F
+from django.db.models import Sum, F, Avg
+
 # Create your views here.
 
 class PasswordsChangeView(PasswordChangeView):
@@ -78,6 +80,7 @@ def tablaCartas(request):
     data = {'cartas': cartas}
     return render(request, 'plataformaYugimon/tablaCartas.html', data)
 
+@user_passes_test(lambda u: u.is_superuser)
 def crearBanlist(request):
     form = BanlistForm()
     if request.method == 'POST':
@@ -144,6 +147,7 @@ class ListaCartas(ListView):
     model = Carta
     template_name = 'plataformaYugimon/crearMazo.html'
 
+@login_required
 @require_POST
 def update_mazo(request):
     carta_id = request.POST.get("carta_id")
@@ -161,6 +165,7 @@ def update_mazo(request):
 
     return redirect("editar_mazo", mazo_id=mazo_id)
 
+@login_required
 def crear_mazo(request):
     if request.method == "POST":
         form = MazoForm(request.POST)
@@ -172,8 +177,9 @@ def crear_mazo(request):
     else:
         form = MazoForm()
 
-    return render(request, "plataformaYugimon/crearmazo.html", {'form':form})
+    return render(request, "plataformaYugimon/crearMazo.html", {'form':form})
 
+@login_required
 def editar_mazo(request, mazo_id):
     mazo = Mazo.objects.get(id=mazo_id)
     cartas = Carta.objects.all()
@@ -191,6 +197,7 @@ def editar_mazo(request, mazo_id):
 
     return render(request, 'plataformaYugimon/editarMazo.html', context)
 
+@login_required
 @require_POST
 def update_mazo_ajax(request):
     data = json.loads(request.body)
@@ -271,14 +278,57 @@ class CartaView(ListView):
     model = Carta
     template_name = 'plataformaYugimon/ListaCartas.html'
 
+@login_required
 def listarMazos(request):
-    mazos = Mazo.objects.all().order_by('-id')
+    mazos = Mazo.objects.all().annotate(
+        promedio_estrellas=Avg('puntuacionmazo__estrellas') 
+    ).order_by('-id')
+    
+    for mazo in mazos:
+        if mazo.promedio_estrellas is not None:
+            mazo.puntuacion_promedio = round(mazo.promedio_estrellas, 2)
+        else:
+            mazo.puntuacion_promedio = '-'
     return render(request, "plataformaYugimon/listarMazos.html", {
         "mazos": mazos
     })
 
+@login_required
 def verMazo(request, mazo_id):
-    mazo = Mazo.objects.get(id=mazo_id)
+    mazo = get_object_or_404(Mazo, id=mazo_id)
+
+    #Genera un promedio de todas las puntuaciones de un mazo y lo retorna
+    if request.method == 'POST':
+        estrellas = request.POST.get('val')
+        
+        if estrellas:
+            estrellas_num = int(estrellas)
+            if 1 <= estrellas_num <= 5:
+                PuntuacionMazo.objects.update_or_create(
+                    mazo=mazo,
+                    usuario=request.user, 
+                    defaults={'estrellas': estrellas_num}
+                )
+                nuevo_promedio = PuntuacionMazo.objects.filter(mazo=mazo).aggregate(Avg('estrellas')).get('estrellas__avg')
+                
+                if nuevo_promedio is not None:
+                    promedio_formateado = round(nuevo_promedio, 2)
+                else:
+                    promedio_formateado = None
+
+                return JsonResponse({
+                    'success': True, 
+                    'message': 'Puntuación guardada con éxito.',
+                    'promedio_estrellas': promedio_formateado
+                })
+
+    #Guarda la cantidad de estrellas seleccionada por el usuario
+    puntuacion_usuario = 0
+    try:
+        voto_existente = PuntuacionMazo.objects.get(mazo=mazo, usuario=request.user)
+        puntuacion_usuario = voto_existente.estrellas
+    except PuntuacionMazo.DoesNotExist:
+        puntuacion_usuario = 0
 
     cartas = (
         Cartas_mazos.objects
@@ -293,11 +343,33 @@ def verMazo(request, mazo_id):
 
     total = sum(c['cantidad'] for c in cartas)
 
+    promedio_puntuacion = PuntuacionMazo.objects.filter(mazo=mazo).aggregate(Avg('estrellas'))
+    promedio_estrellas = promedio_puntuacion.get('estrellas__avg')
+
+    if promedio_estrellas is not None:
+        promedio_formateado = round(promedio_estrellas, 2) 
+    else:
+        promedio_formateado = None
+
+    sort_order = request.GET.get('sort', '-fecha')
+    allowed_sorts = {
+        '-fecha': '-fecha',  
+        'fecha': 'fecha',
+    }
+    sort_field = allowed_sorts.get(sort_order, '-fecha')
+    comentarios_ordenados = mazo.comentarios.all().order_by(sort_field)
+
     return render(request, "plataformaYugimon/verMazo.html", {
         "mazo": mazo,
         "cartas": cartas,
         "total": total,
+        "comentarios_ordenados": comentarios_ordenados,
+        "current_sort": sort_order,
+        "promedio_estrellas": promedio_formateado,
+        "puntuacion_usuario": puntuacion_usuario,
     })
+
+@login_required
 def eliminarMazo(request, mazo_id):
     mazo = get_object_or_404(Mazo, id=mazo_id)
 
@@ -309,6 +381,7 @@ def eliminarMazo(request, mazo_id):
         "mazo": mazo
     })
 
+@method_decorator(user_passes_test(lambda u: u.is_superuser), name='dispatch')
 class CrearBanlist(CreateView):
     model = Cartas_Banlist
     form_class = BanlistForm
@@ -410,3 +483,70 @@ class EditarPostVentaMazos(UpdateView):
     
     form_class = PostVentaMazoForm
     success_url = reverse_lazy('listarPublicacionesMazos')
+class CrearComentario(CreateView):
+    model = Comentario
+    form_class = ComentarioForm
+    template_name = 'plataformaYugimon/crearComentario.html'
+
+    def form_valid(self, form):
+        form.instance.mazo_id = self.kwargs['pk']
+        form.instance.autor = self.request.user
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        return reverse_lazy('verMazo', kwargs={'mazo_id': self.kwargs['pk']})
+    
+class EditarComentario(UpdateView):
+    model = Comentario
+    template_name = "plataformaYugimon/editarComentario.html"
+    form_class = ComentarioForm
+    def get_success_url(self):
+        mazo_id = self.object.mazo.id
+        return reverse_lazy('verMazo', kwargs={'mazo_id': mazo_id})
+
+class EliminarComentario(DeleteView):
+    model = Comentario
+    template_name = 'plataformaYugimon/verMazo.html'
+    def get_success_url(self):
+        mazo_id = self.object.mazo.id
+        return reverse_lazy('verMazo', kwargs={'mazo_id': mazo_id})
+
+
+class CrearRespuestaComentario(CreateView):
+    model = RespuestaComentario
+    form_class = RespuestaComentarioForm
+    template_name = 'plataformaYugimon/crearComentario.html'
+
+    def form_valid(self, form):
+        comentario = get_object_or_404(Comentario, pk=self.kwargs['pk'])
+        form.instance.comentario = comentario
+        form.instance.autor = self.request.user
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        comentario = get_object_or_404(Comentario, pk=self.kwargs['pk'])
+        mazo_id = comentario.mazo.id
+        return reverse_lazy('verMazo', kwargs={'mazo_id': mazo_id})
+    
+class EditarRespuestaComentario(UpdateView):
+    model = RespuestaComentario
+    template_name = "plataformaYugimon/editarComentario.html"
+    form_class = RespuestaComentarioForm
+    def get_success_url(self):
+        mazo_id = self.object.comentario.mazo.id 
+        return reverse_lazy('verMazo', kwargs={'mazo_id': mazo_id})
+
+class EliminarRespuestaComentario(DeleteView):
+    model = RespuestaComentario
+    template_name = 'plataformaYugimon/verMazo.html'
+    def get_success_url(self):
+        mazo_id = self.object.comentario.mazo.id 
+        return reverse_lazy('verMazo', kwargs={'mazo_id': mazo_id})
+    
+
+@login_required
+def misMazos(request):
+    usuario_logueado = request.user
+    mazos = Mazo.objects.filter(id_usuario=usuario_logueado)
+    data = {'mazos': mazos}
+    return render(request, 'plataformaYugimon/listarMazos.html', data)

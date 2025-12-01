@@ -18,32 +18,37 @@
 
         <div class="col">
 
+            {% if object_list %}
             <div class="card col">
 
                 <div class="card-body">
                     <div class="row">
-                        {% for carta in object_list %}
+                            {% for carta in object_list %}
 
-                        <div class="col justify-content-center mb-4">
-                            <a href="" data-bs-toggle="modal" data-bs-target="#exampleModal{{carta.id}}">
-                                <img src="{{ carta.ilustracion }}" width="150" alt="{{carta.nombre}}">
-                            </a>
+                                <div class="col justify-content-center mb-4">
+                                    <a href="" data-bs-toggle="modal" data-bs-target="#exampleModal{{carta.id}}">
+                                        <img src="{{ carta.ilustracion }}" width="150" alt="{{carta.nombre}}">
+                                    </a>
+                                </div>
+                                <!-- Modal -->
+                                <div class="modal fade" id="exampleModal{{carta.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <img src="{{ carta.ilustracion }}" width="500" alt="{{carta.nombre}}">
+                                </div>
+                                </div>
+                            {% endfor %}
+                            
                         </div>
-                        <!-- Modal -->
-                        <div class="modal fade" id="exampleModal{{carta.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <img src="{{ carta.ilustracion }}" width="500" alt="{{carta.nombre}}">
-                        </div>
-                        </div>
-
-                        {% endfor %}
-
+                        
                     </div>
-
+                    
                 </div>
-
             </div>
-        </div>
+            {% else %}
+                <div class="alert alert-danger text-center">
+                    <h1>No hay cartas en el sistema</h1>
+                </div>
+            {% endif %}
 
 
     </div>

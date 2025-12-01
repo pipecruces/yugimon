@@ -17,7 +17,7 @@
                     </a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="{% url 'verCartas' %}">Lista de Cartas</a></li>
-                        <li><a class="dropdown-item" href="#">Lista de Mazos</a></li>
+                        <li><a class="dropdown-item" href="{% url 'listarMazos' %}">Lista de Mazos</a></li>
                     </ul>
                 </li>
                 {% if user.is_authenticated %}
@@ -36,7 +36,7 @@
                     </a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="{% url 'crearMazo' %}">Crear Mazo</a></li>
-                        <li><a class="dropdown-item" href="{% url 'listarMazos' %}">Ver Mazos</a></li>
+                        <li><a class="dropdown-item" href="{% url 'misMazos' %}">Mis Mazos</a></li>
                     </ul>
                 </li>
                 {% endif %}
