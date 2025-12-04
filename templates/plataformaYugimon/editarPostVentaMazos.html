@@ -1,0 +1,37 @@
+{% extends 'base/base.html' %}
+
+{% block titulo %}
+    Edita tu publicación de venta de Mazo...
+{% endblock %}
+
+{% block contenido %}
+    {% if user.id != publicacion_venta.id_usuario.id %}
+        <div class="alert alert-danger">
+            <h1>Esta publicación fue creada por otro usuario</h1>
+        </div>
+    {% else %}
+        <div class="container mt-5 d-flex justify-content-center">
+
+            <div class="card col-lg-9">
+                <div class="card-header d-flex justify-content-center">
+                    <h1>Edita tu publicación</h1>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <form method="POST">
+                            {% csrf_token %}
+                            {{form.media}}
+                            {{form.as_p}}
+                            <div class="d-flex justify-content-between">
+                                <button class="btn btn-success" type="submit">Guardar</button>
+                                <a class="btn btn-danger" href="{% url 'listarPublicacionesMazos' %}">Cancelar</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    {% endif %}
+
+{% endblock %}

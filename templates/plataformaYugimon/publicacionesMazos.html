@@ -1,0 +1,72 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block titulo %}
+    Publicaciones
+{% endblock %}
+
+{% block contenido %}
+
+    <div class="container mt-4">
+
+        <div class="alert alert-info d-flex justify-content-center">
+            <h1>Publicaciones de Venta de Mazos</h1>
+        </div>
+
+        <a class="btn btn-success" href="{% url 'escribirPostVentaMazos' %}">Crear Publicación</a>
+
+
+        <hr>
+        
+        <div class="row">
+            {% for pub in publicaciones %}
+            <div class="col-12">
+                <div class="card mb-3">
+
+                    <div class="card-header d-flex justify-content-between">
+                        <div class="d-flex align-items-center">
+                            {{pub.titulo}}
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i>Publicado hace:  {{ pub.fecha_publicacion|timesince }} </i>
+                        </div>
+                    </div>
+                    <div class="card-body">
+
+                        <p><strong>Mazo:</strong> {{ pub.id_mazo.nombre }}</p>
+                        <p><strong>Publicado por:</strong> {{ pub.id_usuario.username }}</p>
+                        
+                        
+                        <div class="row mt-3" style="overflow-x: auto; white-space: nowrap;">
+
+                            {% for cm in pub.id_mazo.rel_mazos.all %}
+                                <div class="col-1 mb-2 text-center">
+
+                                    <a href="#" data-bs-toggle="modal" data-bs-target="#exampleModal{{ cm.id_carta.id }}">
+
+                                        <img src="{{ cm.id_carta.ilustracion }}"
+                                            class="img-thumbnail"
+                                            style="height: 120px;  object-fit: cover;"
+                                            alt="No hay imagen">
+                                    </a>
+                                    <div class="modal fade" id="exampleModal{{cm.id_carta.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <img src="{{ cm.id_carta.ilustracion }}" width="500" alt="{{cm.id_carta.nombre}}">
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+
+                        </div>
+
+                        <a class="btn btn-primary" 
+                        href="{% url 'detallesPublicacionVentaMazos' pub.pk %}">
+                        Ver detalle
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+{% endblock %}

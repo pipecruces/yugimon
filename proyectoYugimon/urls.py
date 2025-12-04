@@ -33,7 +33,8 @@ urlpatterns = [
 
     #Crud Banlist ****
     path('mostrarBanlist/', MostrarCartasBanlistView.as_view(), name='mostrarBanlist'),
-    path('agregarBanlist/', CrearBanlist.as_view(), name='agregarCartasBanlist'),
+    path('agregarBanlist/', login_required(CrearBanlist.as_view()), name='agregarCartasBanlist'),
+    path('editarBanlist/<int:pk>', login_required(editarBanlist.as_view()), name='editarBanlist'),
 
     #Autenticación y home
     path('accounts/', include('django.contrib.auth.urls')),
@@ -46,8 +47,15 @@ urlpatterns = [
     path('escribirPostCarta/', login_required(EscribirPostCarta.as_view()), name="postCarta"),
     path('editarPostCarta/<int:pk>', login_required(EditarPostCarta.as_view()), name="editarPostCarta"),
     path('eliminarPostCarta/<int:pk>', login_required(EliminarPostCarta.as_view()), name="eliminarPostCarta"),
-    #Filtros de categoria
-    path('publicacionCartas/<str:categorias>', CategoriaView, name='categoria'),
+
+    #Publicaciones de venta de mazos
+    
+    path('escribirPostVentaMazos/', login_required(EscribirPostVentaMazo.as_view()), name="escribirPostVentaMazos"),
+    path('publicacionesMazos/', login_required(PublicacionesMazosListView.as_view()), name='listarPublicacionesMazos'),
+    path('publicacionVentaMazos/<int:pk>/', login_required(PublicacionVentaMazoView.as_view()), name='detallesPublicacionVentaMazos'),
+    path('eliminarPostVentaMazos/<int:pk>', login_required(EliminarVentaMazos.as_view()), name="eliminarPostVentaMazos"),
+    path('editarPostVentaMazos/<int:pk>', login_required(EditarPostVentaMazos.as_view()), name="editarPostVentaMazos"),
+
 
     #CRUD MAZOS
     path('crearMazo/', crear_mazo, name='crearMazo'),
@@ -56,7 +64,16 @@ urlpatterns = [
     path("mazo/update/ajax/", update_mazo_ajax, name="update_mazo_ajax"),
     path('verCartas', CartaView.as_view(), name="verCartas"),
     path("mazos/", listarMazos, name="listarMazos"),
+    path("misMazos/", misMazos, name="misMazos"),
     path("mazo/<int:mazo_id>/ver/", verMazo, name="verMazo"),
     path("mazo/<int:mazo_id>/eliminar/", eliminarMazo, name="eliminarMazo"),
 
+    #Comentarios
+    path('mazo/<int:pk>/ver/crearComentario', login_required(CrearComentario.as_view()), name="comentario"),
+    path('editarComentario/<int:pk>/', login_required(EditarComentario.as_view()), name="editarComentario"),
+    path('eliminarComentario/<int:pk>/', login_required(EliminarComentario.as_view()), name="eliminarComentario"),
+
+    path('comentario/<int:pk>/responder/', login_required(CrearRespuestaComentario.as_view()), name="responderComentario"),
+    path('editarRespuesta/<int:pk>/', login_required(EditarRespuestaComentario.as_view()), name="editarRespuesta"),
+    path('eliminarRespuesta/<int:pk>/', login_required(EliminarRespuestaComentario.as_view()), name="eliminarRespuesta"),
 ]

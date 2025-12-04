@@ -1,8 +1,11 @@
 {% extends 'base/base.html' %}
+{% load static %}
 {% block contenido %}
-
+{% load static %}
 <h1>{{ mazo.nombre }}</h1>
+<p>Creado por: {{mazo.id_usuario}}</p>
 <p>{{ mazo.descripcion }}</p>
+
 
 <h3>Total de cartas: {{ total }}</h3>
 
@@ -11,24 +14,228 @@
         <tr>
             <th>Carta</th>
             <th>Cantidad</th>
+            <th>Ilustración</th>
         </tr>
     </thead>
     <tbody>
         {% for item in cartas %}
         <tr>
-            <td>{{ item.id_carta.nombre }}</td>
+            <!-- Nombre de la carta -->
+            <td>{{ item.nombre }}</td>
+
+            <!-- Cantidad total acumulada -->
             <td>{{ item.cantidad }}</td>
+
+            <!-- Imagen + Modal -->
+            <td>
+                <a href="#" data-bs-toggle="modal" data-bs-target="#exampleModal{{ item.id_carta }}">
+                    <img src="{{ item.ilustracion }}" alt="{{ item.nombre }}" style="width: 60px; height: 80px;">
+                </a>
+
+                <div class="modal fade" id="exampleModal{{ item.id_carta }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <img src="{{ item.ilustracion }}" width="500" alt="{{ item.nombre }}">
+                    </div>
+                </div>
+            </td>
         </tr>
         {% empty %}
         <tr>
-            <td colspan="2" class="text-center">El mazo está vacío.</td>
+            <td colspan="3" class="text-center">El mazo está vacío.</td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+<div class="d-flex justify-content-between">
+    <div class="d-flex">
+        <a href="{% url 'editar_mazo' mazo.id %}" class="btn btn-warning mt-3">Editar Mazo</a>
+        <a href="{% url 'listarMazos' %}" class="btn btn-secondary mt-3">Volver</a>
+        <a href="{% url 'eliminarMazo' mazo.id %}" class="btn btn-danger mt-3">Eliminar Mazo</a>
+    </div>
+    <div class="d-flex">
+        <div class="d-flex justify-content-between">
+            <div class="d-flex align-items-center">
+                <form class="rate-form" action="" method="post" id="{{mazo.id}}" data-rate-url="{% url 'verMazo' mazo.id %}" data-initial-rating="{{ puntuacion_usuario }}">
+                    {% csrf_token %}
+                    <button type="submit" class="fa fa-star fa-2x btn-estrellas" id="primera"></button>
+                    <button type="submit" class="fa fa-star fa-2x btn-estrellas" id="segunda"></button>
+                    <button type="submit" class="fa fa-star fa-2x btn-estrellas" id="tercera"></button>
+                    <button type="submit" class="fa fa-star fa-2x btn-estrellas" id="cuarta"></button>
+                    <button type="submit" class="fa fa-star fa-2x btn-estrellas" id="quinta"></button>
+                </form>
+            </div>
+            <div class="d-flex align-items-center ms-3">
+                {% if promedio_estrellas is not None %}
+                    <h4 class="mb-0">{{ promedio_estrellas }} <small class="text-muted">/ 5</small></h4>
+                {% else %}
+                    <h4 class="mb-0">- <small class="text-muted">/ 5</small></h4>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+<br/>
+<hr>
 
-<a href="{% url 'editar_mazo' mazo.id %}" class="btn btn-warning mt-3">Editar Mazo</a>
-<a href="{% url 'listarMazos' %}" class="btn btn-secondary mt-3">Volver</a>
-<a href="{% url 'eliminarMazo' mazo.id %}" class="btn btn-danger mt-3">Eliminar Mazo</a>
 
+<div class="d-flex justify-content-between align-items-center">
+    <div class="d-flex">
+        <a href="{% url 'comentario' mazo.pk %}" class="btn btn-success">Añadir Comentario...</a>
+    </div>
+    {% if not comentarios_ordenados %}
+
+    {% else %}
+        <div class="d-flex">
+            <strong>Ordenar por:</strong>
+            <div class="btn-group ms-2" role="group" aria-label="Sort comments">
+        
+                <a href="{% url 'verMazo' mazo.pk %}?sort=-fecha" 
+                class="btn btn-sm {% if current_sort == '-fecha' or not current_sort %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+                    Más Recientes
+                </a>
+        
+                <a href="{% url 'verMazo' mazo.pk %}?sort=fecha" 
+                class="btn btn-sm {% if current_sort == 'fecha' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+                    Más Antiguos
+                </a>
+        
+            </div>
+        </div>
+    {% endif %}
+</div>
+<br/>
+
+{% if not comentarios_ordenados %}
+    <div class="alert alert-info">
+        <h3>No hay comentarios aún!</h3> 
+    </div>
+{% else %}
+    <div class="accordion mb-4" id="accordionExample">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingOne">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                <h3>{{comentarios_ordenados.count}} Comentarios...</h3>
+        </button>
+        </h2>
+        <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+        <div class="accordion-body">
+
+            {% for comentario in comentarios_ordenados %}
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between">
+                        <div>
+                            {{comentario.autor}} 
+                        </div>
+                        <div>
+                            <em>Hace  {{comentario.fecha | timesince}} </em>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {{comentario.contenido |safe}}
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between">
+                            <div class="d-flex d-grid gap-2">
+                                {% if user.id == comentario.autor.id %}
+                                <a class="btn btn-warning" href="{% url 'editarComentario' comentario.pk %}">Editar</a>
+                                <a class="btn btn-danger" href="#" data-bs-toggle="modal" data-bs-target="#exampleModal{{comentario.pk}}">Eliminar</a>
+                                <!-- Modal Eliminar -->
+                                <div class="modal fade" id="exampleModal{{comentario.pk}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h1 class="modal-title fs-5" id="exampleModalLabel">Eliminar Post</h1>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                Seguro que quieres eliminar el comentario?
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                                <div class="form-group">
+                                                    <form method="POST" action="{% url 'eliminarComentario' comentario.pk %}">
+                                                        {% csrf_token %}
+                                                        <div class="d-flex justify-content-between">
+                                                            <button type="submit" class="btn btn-danger">Eliminar</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="d-flex">
+                                <a class="btn btn-primary" href="{% url 'responderComentario' comentario.pk %}">Responder</a>
+                            </div>
+                            
+                        </div>
+                        
+                        {% if comentario.respuestas.all %}
+                            <hr>
+                            <div class="accordion" id="accordionExample-{{comentario.pk}}">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="heading-{{comentario.pk}}">
+                                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{comentario.pk}}" aria-expanded="true" aria-controls="collapse-{{comentario.pk}}">
+                                            <h6>{{comentario.respuestas.count}} Respuestas...</h6>
+                                        </button>
+                                    </h2>
+                                    <div id="collapse-{{comentario.pk}}" class="accordion-collapse collapse" aria-labelledby="heading-{{comentario.pk}}" data-bs-parent="#accordionExample-{{comentario.pk}}">
+                                        <div class="accordion-body">
+
+                                            {% for respuesta in comentario.respuestas.all %}
+                                                <div class="ms-4 p-2 border-start border-1">
+                                                    <strong>{{ respuesta.autor }}</strong> - <em>Hace {{ respuesta.fecha | timesince }}</em>
+                                                    <p>{{ respuesta.contenido | safe }}</p>
+                                                    {% if user.id == respuesta.autor.id %}
+                                                        <a class="btn btn-sm btn-warning" href="{% url 'editarRespuesta' respuesta.pk %}">Editar Respuesta</a>
+                                                        <a class="btn btn-sm btn-danger" href="#" data-bs-toggle="modal" data-bs-target="#exampleModal{{respuesta.pk}}">Eliminar Respuesta</a>
+                                                        <div class="modal fade" id="exampleModal{{respuesta.pk}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                                            <div class="modal-dialog">
+                                                                <div class="modal-content">
+                                                                    <div class="modal-header">
+                                                                        <h1 class="modal-title fs-5" id="exampleModalLabel">Eliminar Post</h1>
+                                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                    </div>
+                                                                    <div class="modal-body">
+                                                                        Seguro que quieres eliminar el comentario?
+                                                                    </div>
+                                                                    <div class="modal-footer">
+                                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                                                        <div class="form-group">
+                                                                            <form method="POST" action="{% url 'eliminarRespuesta' respuesta.pk %}">
+                                                                                {% csrf_token %}
+                                                                                <div class="d-flex justify-content-between">
+                                                                                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                                                                                </div>
+                                                                            </form>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                                <hr>
+                                            {% endfor %}
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                        
+                    </div>
+                </div>
+            {% endfor %}
+
+
+        </div>
+        </div>
+    </div>
+    </div>
+{% endif %}
 {% endblock %}
+
