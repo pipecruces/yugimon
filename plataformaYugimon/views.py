@@ -11,7 +11,7 @@ from django.contrib.auth.views import PasswordChangeView
 from django.views.decorators.http import  require_POST
 from django.http import JsonResponse
 import json
-from django.db.models import Sum, F, Avg
+from django.db.models import Sum, F, Avg, Count
 
 # Create your views here.
 
@@ -560,4 +560,76 @@ def misMazos(request):
             mazo.puntuacion_promedio = '-'
     return render(request, "plataformaYugimon/listarMazos.html", {
         "mazos": mazos
+    })
+
+class ComparadorMazo(ListView):
+    model = Cartas_mazos
+    template_name = 'plataformaYugimon/comparadorMazos.html' 
+    context_object_name = 'comparaciones'
+
+    def get_queryset(self):
+        return Mazo.objects.select_related('id_usuario').all()
+
+def obtener_datos_mazo(request, mazo_id):
+    try:
+        mazo = Mazo.objects.get(id=mazo_id)
+    except Mazo.DoesNotExist:
+        return JsonResponse({"error": "Mazo no encontrado."}, status=404)
+
+    # Obtener el listado de cartas con su cantidad y datos
+    cartas_mazo_qs = (
+        Cartas_mazos.objects
+        .filter(id_mazo=mazo)
+        .values('id_carta')
+        .annotate(
+            cantidad=Count('id_carta'),
+            nombre=F('id_carta__nombre'),
+            habilidad=F('id_carta__habilidad'),
+            raza=F('id_carta__id_raza__nombre'),
+            tipo=F('id_carta__id_tipo__nombre'),
+            edicion=F('id_carta__id_edicion__nombre'),
+            ilustracion=F('id_carta__ilustracion'),
+            coste=F('id_carta__coste'), 
+            fuerza=F('id_carta__fuerza'), 
+        )
+        .order_by('nombre')
+    )
+
+    # Calcular estadísticas del mazo
+    stats_agregadas = (
+        Cartas_mazos.objects
+        .filter(id_mazo=mazo)
+        .aggregate(
+            coste_total=Sum('id_carta__coste'),
+            fuerza_total=Sum('id_carta__fuerza'),
+            coste_promedio=Avg('id_carta__coste'),
+            fuerza_promedio=Avg('id_carta__fuerza'),
+            total_cartas=Count('id_carta')
+        )
+    )
+
+    # Calcular el promedio de estrellas del mazo
+    promedio_puntuacion = PuntuacionMazo.objects.filter(mazo=mazo).aggregate(Avg('estrellas'))
+    promedio_estrellas = promedio_puntuacion.get('estrellas__avg')
+    
+    # Formatear el promedio de estrellas
+    puntuacion_formateada = round(promedio_estrellas, 2) if promedio_estrellas is not None else 0
+
+    # Prepara los datos de las cartas para el JSON
+    cartas_list = list(cartas_mazo_qs)
+
+    # Prepara las estadísticas formateadas
+    stats_formateadas = {
+        "Nombre": mazo.nombre,
+        "Total de Cartas": stats_agregadas.get('total_cartas', 0),
+        "Coste Total": stats_agregadas.get('coste_total', 0) or 0,
+        "Fuerza Total": stats_agregadas.get('fuerza_total', 0) or 0,
+        "Coste Promedio": round(stats_agregadas.get('coste_promedio', 0) or 0, 2),
+        "Fuerza Promedio": round(stats_agregadas.get('fuerza_promedio', 0) or 0, 2),
+        "Puntuación Promedio": puntuacion_formateada,
+    }
+
+    return JsonResponse({
+        "stats": stats_formateadas,
+        "cartas": cartas_list
     })

@@ -67,6 +67,8 @@ urlpatterns = [
     path("misMazos/", misMazos, name="misMazos"),
     path("mazo/<int:mazo_id>/ver/", verMazo, name="verMazo"),
     path("mazo/<int:mazo_id>/eliminar/", eliminarMazo, name="eliminarMazo"),
+    path('comparador/datos_mazo/<int:mazo_id>/', obtener_datos_mazo, name='obtener_datos_mazo'),
+    path('comparador/', ComparadorMazo.as_view(),name='comparador'),
 
     #Comentarios
     path('mazo/<int:pk>/ver/crearComentario', login_required(CrearComentario.as_view()), name="comentario"),

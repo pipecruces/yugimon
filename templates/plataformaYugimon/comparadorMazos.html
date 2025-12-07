@@ -1,0 +1,75 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block contenido %}
+    <div class="alert alert-info d-flex justify-content-center mb-5">
+        <h1>Comparador de Mazos</h1>
+    </div>
+
+    <div class="row d-flex justify-content-evenly d-grid gap-4">
+        <div class="card col-12 col-lg-3">
+            <div class="card-header">
+                Mi Mazo:
+                <select name="mazos-1" id="mazo-select-1" class="form-select">
+                <option value="">--Elige una opcion--</option>
+                {% for mazo in comparaciones %}
+                    {% if mazo.id_usuario == request.user %}
+                        <option value="{{mazo.id}}">{{mazo.nombre}}</option>
+                    {% endif %}
+                {% endfor %}
+                </select>
+            </div>
+            <div class="card-body" id="card-body-1" style="max-height: 400px; overflow-y: auto;">
+                <p>Selecciona un mazo para ver las cartas.</p>
+            </div>
+        </div>
+
+        <div class="card col-12 col-lg-5">
+            <div class="card-header text-center">
+                <h2>VS</h2>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th id="deck-1-name">Mazo 1</th>
+                            <th>Estadística</th>
+                            <th id="deck-2-name">Mazo 2</th>
+                        </tr>
+                    </thead>
+                    <tbody id="comparacion-stats-body">
+                        <tr><td colspan="3" class="text-center">Selecciona ambos mazos.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card col-12 col-lg-3">
+            <div class="card-header">
+                Otro Mazo:
+                <select name="mazos-2" id="mazo-select-2" class="form-select">
+                <option value="">--Elige una opcion--</option>
+                {% for mazo in comparaciones %}
+                    <option value="{{mazo.id}}">{{mazo.nombre}}</option>
+                {% endfor %}
+                </select>
+            </div>
+            <div class="card-body" id="card-body-2" style="max-height: 400px; overflow-y: auto;">
+                <p>Selecciona un mazo para ver las cartas.</p>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="cardModal" tabindex="-1" aria-labelledby="cardModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center p-0">
+                    <img src="" id="cardModalImage" width="500" alt="Carta">
+                </div>
+                <div class="modal-footer justify-content-start">
+                    <div id="cardModalDetails"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'js/comparador.js' %}"></script>
+{% endblock %}
