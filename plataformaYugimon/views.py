@@ -11,7 +11,9 @@ from django.contrib.auth.views import PasswordChangeView
 from django.views.decorators.http import  require_POST
 from django.http import JsonResponse
 import json
-from django.db.models import Sum, F, Avg, Count
+from django.db.models import Sum, F, Avg, Count, Q
+from .models import Edicion, Tipo, Raza
+from django.core.paginator import Paginator
 
 # Create your views here.
 
@@ -97,11 +99,10 @@ class PublicacionCartaView(ListView):
     model = Publicacion_intercambio
     template_name = 'plataformaYugimon/publicacionesCartas.html'
     ordering = ['-fecha']
+    paginate_by = 5
 
-    def get_context_data(self, *args, **kwargs):
-        context = super(PublicacionCartaView, self).get_context_data(*args, **kwargs)
-        context['object_list'] = self.model.objects.all().prefetch_related('cartas_tengo', 'cartas_quiero').order_by(*self.ordering)
-        return context
+    def get_queryset(self):
+        return self.model.objects.all().prefetch_related('cartas_tengo', 'cartas_quiero').order_by(*self.ordering)
 
 #Vistas de publicaciones
 class PublicacionCartaDetail(DetailView):
@@ -268,6 +269,47 @@ def update_mazo_ajax(request):
 class CartaView(ListView):
     model = Carta
     template_name = 'plataformaYugimon/ListaCartas.html'
+    paginate_by = 20
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        query = self.request.GET.get('q')
+        if query:
+            queryset = queryset.filter(nombre__icontains=query)
+
+        edicion_id = self.request.GET.get('edicion')
+        if edicion_id:
+            queryset = queryset.filter(id_edicion=edicion_id)
+
+        tipo_id = self.request.GET.get('tipo')
+        if tipo_id:
+            queryset = queryset.filter(id_tipo=tipo_id)
+
+        raza_id = self.request.GET.get('raza')
+        if raza_id:
+            queryset = queryset.filter(id_raza=raza_id)
+
+        coste = self.request.GET.get('coste')
+        if coste:
+            queryset = queryset.filter(coste=int(coste))
+        
+        return queryset.order_by('nombre', 'id')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['ediciones'] = Edicion.objects.all().order_by('nombre')
+        context['tipos'] = Tipo.objects.all().order_by('nombre')
+        context['razas'] = Raza.objects.all().order_by('nombre')
+
+        
+        context['selected_edition'] = self.request.GET.get('edicion', '')
+        context['selected_tipo'] = self.request.GET.get('tipo', '')
+        context['selected_raza'] = self.request.GET.get('raza', '')
+        context['selected_coste'] = self.request.GET.get('coste', '')
+        context['selected_query'] = self.request.GET.get('q', '')
+
+        return context
 
 @login_required
 def listarMazos(request):
@@ -350,11 +392,21 @@ def verMazo(request, mazo_id):
     sort_field = allowed_sorts.get(sort_order, '-fecha')
     comentarios_ordenados = mazo.comentarios.all().order_by(sort_field)
 
+    comentarios_por_pagina = 3
+    paginator = Paginator(comentarios_ordenados, comentarios_por_pagina)
+    page_number = request.GET.get('page')
+
+    try:
+        comentarios_paginados = paginator.get_page(page_number)
+    except Exception:
+        comentarios_paginados = paginator.get_page(1)
+
     return render(request, "plataformaYugimon/verMazo.html", {
         "mazo": mazo,
         "cartas": cartas,
         "total": total,
         "comentarios_ordenados": comentarios_ordenados,
+        "comentarios_paginados": comentarios_paginados,
         "current_sort": sort_order,
         "promedio_estrellas": promedio_formateado,
         "puntuacion_usuario": puntuacion_usuario,
@@ -422,6 +474,7 @@ class PublicacionesMazosListView(ListView):
     template_name = 'plataformaYugimon/publicacionesMazos.html' 
     context_object_name = 'publicaciones'  
     ordering = ['-fecha_publicacion']
+    paginate_by = 5
 
     def get_queryset(self):
         return Publicacion_venta.objects.select_related('id_mazo').all().order_by(*self.ordering)
@@ -570,6 +623,7 @@ class ComparadorMazo(ListView):
     def get_queryset(self):
         return Mazo.objects.select_related('id_usuario').all()
 
+@login_required
 def obtener_datos_mazo(request, mazo_id):
     try:
         mazo = Mazo.objects.get(id=mazo_id)
@@ -620,6 +674,7 @@ def obtener_datos_mazo(request, mazo_id):
 
     # Prepara las estadísticas formateadas
     stats_formateadas = {
+        "ID": mazo.id,
         "Nombre": mazo.nombre,
         "Total de Cartas": stats_agregadas.get('total_cartas', 0),
         "Coste Total": stats_agregadas.get('coste_total', 0) or 0,

@@ -72,7 +72,8 @@ function renderCardList(data, container) {
         return; 
     } 
  
-    let html = `<div class="row">`;
+    let html = `<div class="row">
+    `;
     data.cartas.forEach(carta => {
         html += 
         `<div class="col-6 mb-3 text-center">
@@ -119,7 +120,9 @@ function renderComparisonTable() {
         'Fuerza Total',  
         'Coste Promedio',  
         'Fuerza Promedio',
-        'Puntuación Promedio'
+        'Puntuación Promedio',
+        "ID",
+        'Ir al Mazo'
     ]; 
 
     statKeys.forEach(key => { 
@@ -132,32 +135,50 @@ function renderComparisonTable() {
         const isCostStat = key.includes('Coste');
         const isScoreStat = key.includes('Puntuación');
 
+        let content1 = val1;
+        let content2 = val2;        
+
+        if (key === 'Ir al Mazo') {
+            const url1 = `/mazo/${stats1.ID}/ver`;
+            const url2 = `/mazo/${stats2.ID}/ver`;
+            
+            content1 = `<a href="${url1}" class="btn btn-sm btn-warning">Ver Mazo</a>`;
+            content2 = `<a href="${url2}" class="btn btn-sm btn-warning">Ver Mazo</a>`;
+            class1 = 'text-center';
+            class2 = 'text-center';
+        } else if (key === 'ID') {
+             return;
+        }
+
         // Resalta la mejor estadistica
-        if (isCostStat) {
-            if (val1 < val2) {
-                class1 = 'bg-success text-white fw-bold';
-            } else if (val2 < val1) {
-                class2 = 'bg-success text-white fw-bold';
-            }
-        } else if (isScoreStat) {
-            if (val1 > val2) {
-                class1 = 'bg-success text-white fw-bold';
-            } else if (val2 > val1) {
-                class2 = 'bg-success text-white fw-bold';
-            }
-        } else {
-            if (val1 > val2) {
-                class1 = 'bg-success text-white fw-bold';
-            } else if (val2 > val1) {
-                class2 = 'bg-success text-white fw-bold';
+        if (key !== 'Ir al Mazo'){
+            if (isCostStat) {
+                if (val1 < val2) {
+                    class1 = 'bg-success text-white fw-bold';
+                } else if (val2 < val1) {
+                    class2 = 'bg-success text-white fw-bold';
+                }
+            } else if (isScoreStat) {
+                if (val1 > val2) {
+                    class1 = 'bg-success text-white fw-bold';
+                } else if (val2 > val1) {
+                    class2 = 'bg-success text-white fw-bold';
+                }
+            } else {
+                if (val1 > val2) {
+                    class1 = 'bg-success text-white fw-bold';
+                } else if (val2 > val1) {
+                    class2 = 'bg-success text-white fw-bold';
+                }
             }
         }
+        
 
         html += ` 
             <tr> 
-                <td class="${class1}">${val1}</td> 
-                <td>${key}</td> 
-                <td class="${class2}">${val2}</td> 
+                <td class="${class1} text-center">${content1}</td> 
+                <td class="text-center">${key}</td> 
+                <td class="${class2} text-center">${content2}</td> 
             </tr> 
         `; 
     }); 

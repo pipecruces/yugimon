@@ -62,13 +62,13 @@ urlpatterns = [
     path("mazo/<int:mazo_id>/editar/", editar_mazo, name="editar_mazo"),
     path("mazo/update/", update_mazo, name="update_mazo"),
     path("mazo/update/ajax/", update_mazo_ajax, name="update_mazo_ajax"),
-    path('verCartas', CartaView.as_view(), name="verCartas"),
+    path('verCartas/', CartaView.as_view(), name="verCartas"),
     path("mazos/", listarMazos, name="listarMazos"),
     path("misMazos/", misMazos, name="misMazos"),
     path("mazo/<int:mazo_id>/ver/", verMazo, name="verMazo"),
     path("mazo/<int:mazo_id>/eliminar/", eliminarMazo, name="eliminarMazo"),
     path('comparador/datos_mazo/<int:mazo_id>/', obtener_datos_mazo, name='obtener_datos_mazo'),
-    path('comparador/', ComparadorMazo.as_view(),name='comparador'),
+    path('comparador/', login_required(ComparadorMazo.as_view()),name='comparador'),
 
     #Comentarios
     path('mazo/<int:pk>/ver/crearComentario', login_required(CrearComentario.as_view()), name="comentario"),

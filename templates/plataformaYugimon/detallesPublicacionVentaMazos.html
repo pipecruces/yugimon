@@ -58,6 +58,7 @@
                     <p><strong>Nota promedio:</strong> {{ puntuacion_promedio }} /5</p>
                     <p><strong>Estado:</strong> {{ mazo.id_estado.nombre }}</p>
                     <p><strong>Creador del mazo:</strong> {{ mazo.id_usuario.username }}</p>
+                    <a class="btn btn-warning" href="{% url 'verMazo' mazo.id %}">Ir al mazo</a>
                 </div>
             </div>
 

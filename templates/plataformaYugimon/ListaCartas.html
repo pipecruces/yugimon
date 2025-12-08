@@ -5,50 +5,159 @@
         <h1>Cartas</h1>
     </div>
 
-    <div class="row">
+    <div class="row justify-content-evenly">
 
-        <div class="card col-2 me-4 h-50">
+        <div class="card col-12 col-lg-2 mb-4" style="max-height: 570px; overflow-y: auto;">
             <div class="card-header">
                 Filtros
             </div>
             <div class="card-body">
-                Filtros
+                <form method="GET" action="{% url 'verCartas' %}">
+                    <div class="mb-3">
+                        <input type="text" class="form-control" id="searchQuery" name="q" value="{{ selected_query }}" placeholder="Escribe el nombre"> 
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edicionFilter" class="form-label">Edición:</label>
+                        <select class="form-select" id="edicionFilter" name="edicion">
+                            <option value="">Todas las Ediciones</option>
+                            {% for edicion in ediciones %}
+                                <option value="{{ edicion.id }}" {% if selected_edicion == edicion.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ edicion.nombre }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="tipoFilter" class="form-label">Tipo:</label>
+                        <select class="form-select" id="tipoFilter" name="tipo">
+                            <option value="">Todos los Tipos</option>
+                            {% for tipo in tipos %}
+                                <option value="{{ tipo.id }}" {% if selected_tipo == tipo.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ tipo.nombre }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="razaFilter" class="form-label">Raza:</label>
+                        <select class="form-select" id="razaFilter" name="raza">
+                            <option value="">Todas las Razas</option>
+                            {% for raza in razas %}
+                                <option value="{{ raza.id }}" {% if selected_raza == raza.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ raza.nombre }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="costeFilter" class="form-label">Coste:</label>
+                        <input type="number" min="0" class="form-control" id="costeFilter" name="coste" value="{{ selected_coste }}" placeholder="Costo exacto">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">Aplicar Filtros</button>
+                    <a href="{% url 'verCartas' %}" class="btn btn-secondary w-100 mt-2">Limpiar Filtros</a>
+                </form>
             </div>
         </div>
 
-        <div class="col">
+        {% if object_list %}
 
-            {% if object_list %}
-            <div class="card col">
+        <div class="card col-12 col-lg-9">
+            <div class="card-header">
+                {% if is_paginated %}
+                    <nav aria-label="Page navigation" class="mt-4 col-12 col-lg-9">
+                        <ul class="pagination justify-content-center">
 
-                <div class="card-body">
-                    <div class="row">
-                            {% for carta in object_list %}
-
-                                <div class="col justify-content-center mb-4">
-                                    <a href="" data-bs-toggle="modal" data-bs-target="#exampleModal{{carta.id}}">
-                                        <img src="{{ carta.ilustracion }}" width="150" alt="{{carta.nombre}}">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" 
+                                    href="?page={{ page_obj.previous_page_number }}&q={{ selected_query }}&edicion={{ selected_edicion }}&tipo={{ selected_tipo }}&raza={{ selected_raza }}&coste={{ selected_coste }}" 
+                                    aria-label="Previous">
+                                        &laquo; Anterior
                                     </a>
-                                </div>
-                                <!-- Modal -->
-                                <div class="modal fade" id="exampleModal{{carta.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <img src="{{ carta.ilustracion }}" width="500" alt="{{carta.nombre}}">
-                                </div>
-                                </div>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">&laquo; Anterior</span>
+                                </li>
+                            {% endif %}
+
+                            {% for i in paginator.page_range %}
+                                {% if page_obj.number == i %}
+                                    <li class="page-item active" aria-current="page">
+                                        <span class="page-link">{{ i }}</span>
+                                    </li>
+                                {% elif i > page_obj.number|add:'-3' and i < page_obj.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" 
+                                        href="?page={{ i }}&q={{ selected_query }}&edicion={{ selected_edicion }}&tipo={{ selected_tipo }}&raza={{ selected_raza }}&coste={{ selected_coste }}">
+                                            {{ i }}
+                                        </a>
+                                    </li>
+                                {% endif %}
                             {% endfor %}
-                            
-                        </div>
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" 
+                                    href="?page={{ page_obj.next_page_number }}&q={{ selected_query }}&edicion={{ selected_edicion }}&tipo={{ selected_tipo }}&raza={{ selected_raza }}&coste={{ selected_coste }}" 
+                                    aria-label="Next">
+                                        Siguiente &raquo;
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">Siguiente &raquo;</span>
+                                </li>
+                            {% endif %}
+
+                        </ul>
+                    </nav>
+                {% endif %}
+
+            </div>
+
+            <div class="card-body" style="max-height: 570px; overflow-y: auto;">
+                <div class="row">
+                        {% for carta in object_list %}
+
+                            <div class="col justify-content-center mb-4">
+                                <a href="" data-bs-toggle="modal" data-bs-target="#exampleModal{{carta.id}}">
+                                    <img src="{{ carta.ilustracion }}" width="150" alt="{{carta.nombre}}">
+                                </a>
+                            </div>
+                            <div class="modal fade" id="exampleModal{{carta.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <img src="{{ carta.ilustracion }}" width="500" alt="{{carta.nombre}}">
+                            </div>
+                            </div>
+                        {% endfor %}
                         
                     </div>
                     
                 </div>
+                
             </div>
-            {% else %}
-                <div class="alert alert-danger text-center">
-                    <h1>No hay cartas en el sistema</h1>
+        </div>
+        
+        {% else %}
+            <div class="card col-12 col-lg-9">
+
+                <div class="card-body">
+                    <div class="row">
+                        <div class="alert alert-danger text-center">
+                            <h1>La busqueda no encontró resultados...</h1>
+                        </div>
+                    </div>
+                    
                 </div>
-            {% endif %}
+            </div>
+
+        {% endif %}
 
 
     </div>
