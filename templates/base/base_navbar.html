@@ -17,7 +17,9 @@
                     </a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="{% url 'verCartas' %}">Lista de Cartas</a></li>
+                        {% if user.is_authenticated %}
                         <li><a class="dropdown-item" href="{% url 'listarMazos' %}">Lista de Mazos</a></li>
+                        {% endif %}
                     </ul>
                 </li>
                 {% if user.is_authenticated %}

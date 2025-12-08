@@ -132,7 +132,18 @@
                             </div>
                             <div class="modal fade" id="exampleModal{{carta.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered">
-                                <img src="{{ carta.ilustracion }}" width="500" alt="{{carta.nombre}}">
+                                <img src="{{ carta.ilustracion }}" width="500" alt="{{carta.nombre}}" class="me-2">
+                                <div class="modal-content">
+                                    <div class="modal-body">
+                                        <p><strong>Nombre:</strong> {{ carta.nombre }}</p>
+                                        <p><strong>Habilidad:</strong>  {{ carta.habilidad }}</p>
+                                        <p><strong>Raza:</strong>  {{ carta.id_raza.nombre }}</p>
+                                        <p><strong>Edicion:</strong>  {{ carta.id_edicion.nombre }}</p>
+                                        <p><strong>Tipo:</strong>  {{ carta.id_tipo.nombre }}</p>
+                                        <p><strong>Fuerza:</strong>  {{ carta.fuerza }}</p>
+                                        <p><strong>Coste:</strong>   {{ carta.coste }}</p>
+                                    </div>
+                                </div>
                             </div>
                             </div>
                         {% endfor %}

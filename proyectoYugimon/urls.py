@@ -19,6 +19,7 @@ from django.urls import path, include
 from plataformaYugimon.views import *
 from django.views.generic.base import TemplateView
 from django.contrib.auth.decorators import login_required
+from debug_toolbar.toolbar import debug_toolbar_urls
 
 urlpatterns = [
 
@@ -78,4 +79,4 @@ urlpatterns = [
     path('comentario/<int:pk>/responder/', login_required(CrearRespuestaComentario.as_view()), name="responderComentario"),
     path('editarRespuesta/<int:pk>/', login_required(EditarRespuestaComentario.as_view()), name="editarRespuesta"),
     path('eliminarRespuesta/<int:pk>/', login_required(EliminarRespuestaComentario.as_view()), name="eliminarRespuesta"),
-]
+] + debug_toolbar_urls()
