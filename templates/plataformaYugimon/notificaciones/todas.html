@@ -1,0 +1,24 @@
+{% extends 'base/base.html' %}
+
+{% block titulo %}
+<h2>Todas tus notificaciones</h2>
+{% endblock %}
+{% block contenido %}
+
+{% for n in notificaciones %}
+    <div class="card mb-2 {% if not n.leida %}border-warning{% endif %}">
+        <div class="card-body">
+            <p>{{ n.mensaje }}</p>
+            <small class="text-muted">{{ n.fecha }}</small><br>
+
+            {% if not n.leida %}
+                <a href="{% url 'leer_notificacion' n.pk %}" class="btn btn-sm btn-success mt-2">
+                    Marcar como leída
+                </a>
+            {% endif %}
+        </div>
+    </div>
+{% empty %}
+    <p class="text-muted">No tienes notificaciones.</p>
+{% endfor %}
+{% endblock %}

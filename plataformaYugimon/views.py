@@ -688,3 +688,72 @@ def obtener_datos_mazo(request, mazo_id):
         "stats": stats_formateadas,
         "cartas": cartas_list
     })
+
+
+
+def me_interesa(request, pk):
+    publicacion = get_object_or_404(Publicacion_venta, pk=pk)
+
+    Notificacion.objects.create(
+        receptor = publicacion.id_usuario,
+        emisor = request.user,
+        mensaje = f"A {request.user.username} Le interesa tu publicación: {publicacion.titulo} \n Contáctate a su correo: {request.user.email}.",
+        url = f"/publicacionVentaMazos/{pk}/"
+    )
+    return redirect("detallesPublicacionVentaMazos", pk=pk)
+
+
+
+@login_required
+def leer_notificacion(request, pk):
+    notif = get_object_or_404(Notificacion, pk=pk, receptor=request.user)
+    notif.leida = True
+    notif.save()
+    
+    # si la notificación tiene URL, redirige a ella
+    if notif.url:
+        return redirect(notif.url)
+
+    # si no, vuelve a donde estaba
+    return redirect(request.META.get("HTTP_REFERER", "home"))
+
+
+@login_required
+def listar_todas_notificaciones(request):
+    notificaciones = Notificacion.objects.filter(
+        receptor=request.user
+    ).order_by("-fecha")
+
+    return render(request, "plataformaYugimon/notificaciones/todas.html", {
+        "notificaciones": notificaciones
+    })
+
+from django.shortcuts import get_object_or_404, redirect
+from .models import Publicacion_intercambio, Notificacion
+
+def me_interesa_intercambio(request, pk):
+    publicacion = get_object_or_404(Publicacion_intercambio, pk=pk)
+
+    if request.user == publicacion.autor:
+        return redirect(publicacion.get_absolute_url())
+
+    # Crear notificación
+    Notificacion.objects.create(
+        receptor=publicacion.autor,
+        emisor=request.user,
+        mensaje=f"{request.user.username} quiere intercambiar contigo., publicacion: {publicacion.titulo} \n Contáctate a su correo: {request.user.email}.",
+        url=publicacion.get_absolute_url()
+    )
+
+    return redirect(publicacion.get_absolute_url())
+
+def listar_todas_notificaciones(request):
+    notificaciones = Notificacion.objects.filter(
+        receptor=request.user
+    ).order_by('-fecha')
+
+    return render(request, "plataformaYugimon/notificaciones/todas.html", {
+        "notificaciones": notificaciones
+    })
+
+

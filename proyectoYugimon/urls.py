@@ -79,4 +79,12 @@ urlpatterns = [
     path('comentario/<int:pk>/responder/', login_required(CrearRespuestaComentario.as_view()), name="responderComentario"),
     path('editarRespuesta/<int:pk>/', login_required(EditarRespuestaComentario.as_view()), name="editarRespuesta"),
     path('eliminarRespuesta/<int:pk>/', login_required(EliminarRespuestaComentario.as_view()), name="eliminarRespuesta"),
+
+
+    #Notificaciones
+    path("me-interesa/<int:pk>/", me_interesa, name="me_interesa"),
+    path("notificaciones/", listar_todas_notificaciones, name="todas_notificaciones"),
+    path("me-interesa-intercambio/<int:pk>/", me_interesa_intercambio, name="me_interesa_intercambio"),
+    path("notificaciones/<int:pk>/leer/", leer_notificacion, name="leer_notificacion"),
+
 ] + debug_toolbar_urls()

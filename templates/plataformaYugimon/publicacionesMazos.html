@@ -107,7 +107,11 @@
                             {% endfor %}
 
                         </div>
-
+                        {% if pub.id_usuario != request.user %}
+                        <a href="{% url 'me_interesa' pub.pk %}" class="btn btn-warning">
+                            ❤️ Me interesa
+                        </a>
+                        {% endif %}
                         <a class="btn btn-primary" 
                         href="{% url 'detallesPublicacionVentaMazos' pub.pk %}">
                         Ver detalle
