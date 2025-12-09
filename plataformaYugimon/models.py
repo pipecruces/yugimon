@@ -105,11 +105,6 @@ class Comentario(models.Model):
     def __str__(self):
         return '%s - %s' % (self.mazo.nombre, self.autor)
 
-class Usuario_notas(models.Model):
-    nota_promedio = models.FloatField()
-    id_mazo = models.ForeignKey(Mazo, on_delete = models.CASCADE)
-    id_usuario = models.ForeignKey(Usuario, on_delete = models.CASCADE)
-
 class Publicacion_intercambio(models.Model):
     titulo = models.CharField(max_length=255)
     autor = models.ForeignKey(Usuario, on_delete = models.CASCADE)
@@ -137,11 +132,6 @@ class Carta(models.Model):
 
     def __str__(self):
         return 'Nombre: ' + self.nombre + '- Coste: ' + str(self.coste) + '- Tipo: ' + str(self.id_tipo) + '- raza: ' + str(self.id_raza)
-
-
-class Cartas_publicacion_intercambio(models.Model):
-    id_publicacion_intercambio = models.ForeignKey(Publicacion_intercambio, on_delete = models.CASCADE)
-    id_carta = models.ForeignKey(Carta, on_delete = models.CASCADE)
 
 class Cartas_mazos(models.Model):
     id_carta = models.ForeignKey(Carta, on_delete = models.CASCADE, related_name='rel_cartas')
