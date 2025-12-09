@@ -2,9 +2,9 @@ from django.db import models
 from django.urls import reverse
 from ckeditor.fields import RichTextField
 from django.core.validators import MaxValueValidator, MinValueValidator
-
 #Usar email para iniciar sesion
 from django.contrib.auth.models import AbstractUser
+
 
 # Create your models here.
 class Edicion(models.Model):
@@ -57,6 +57,9 @@ class Usuario(AbstractUser):
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ('username',)
+
+    def notificaciones_no_leidas(self):
+        return self.notificaciones_recibidas.filter(leida=False).count()
 
     def __str__(self):
         return self.username
@@ -165,3 +168,16 @@ class RespuestaComentario(models.Model):
 
     def __str__(self):
         return '%s - %s' % (self.comentario.autor, self.autor)
+
+
+class Notificacion(models.Model):
+    receptor = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name="notificaciones_recibidas")
+    emisor = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name="notificaciones_enviadas")
+    mensaje = models.CharField(max_length=255)
+    url = models.CharField(max_length=255, blank=True, null=True)
+    leida = models.BooleanField(default=False)
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.emisor.username} - {self.mensaje[:20]}"
+    

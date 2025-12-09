@@ -113,6 +113,11 @@
                                     </div>
                                 </div>
                             </div>
+                        {% else %}
+                            <a href="{% url 'me_interesa_intercambio' publicacion_intercambio.pk %}" 
+                            class="btn btn-warning btn-sm">
+                                Me interesa ❤️
+                            </a>
                         {% endif %}
                     </div>
                         

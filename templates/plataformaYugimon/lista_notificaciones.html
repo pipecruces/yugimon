@@ -1,0 +1,20 @@
+{% extends 'base/base.html' %}
+
+{% block contenido %}
+<div class="container mt-4">
+    <h2>Todas tus notificaciones</h2>
+    <hr>
+
+    {% for n in notificaciones %}
+        <div class="p-2 mb-2 border rounded {% if not n.leida %}fw-bold bg-light{% endif %}">
+            <a href="{% url 'leer_notificacion' n.pk %}" class="text-decoration-none text-dark">
+                {{ n.mensaje }}
+            </a>
+            <br>
+            <small class="text-muted">{{ n.fecha }}</small>
+        </div>
+    {% empty %}
+        <p class="text-muted">No tienes notificaciones.</p>
+    {% endfor %}
+</div>
+{% endblock %}
