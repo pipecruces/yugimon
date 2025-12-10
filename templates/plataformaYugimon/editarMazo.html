@@ -10,61 +10,58 @@
 
 <div class="row">
 
-    <div class="justify-content-evenly d-flex gap-4">
-        <div class="col card-body justify-content-evenly d-flex gap-4 flex-wrap">
-    
-            {% for carta in object_list %}
-                <div>
-                    <div>
-                        Nombre: {{ carta.nombre }}
-                    </div>
-                    
-                    <img src="{{ carta.ilustracion }}" alt="{{ carta.nombre }}" style="max-width: 150px;">
-                    
-    
-                    <div class="mt-2 d-flex gap-2">               
-                        <button class="btn-agregar" data-id="{{ carta.id }}">Agregar</button>
-                        <button class="btn-quitar" data-id="{{ carta.id }}">Quitar</button>
-                    </div>
-    
-                </div>
-            {% endfor %}    
-        </div>
-    
-        <div class="col-4 d-flex align-items-center">
-            <div class="card">
-                <div class="card-header">
-                    <h3>Cartas en este mazo:</h3>
-                </div>
-                <div class="card-body">
-                    <div id="lista-mazo" style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        {% for cartas_en_mazo in cartas_mazo %}
-                            <div class="item-carta" data-id="{{cartas_en_mazo.id_carta.id}}">
-                                <img src="{{ cartas_en_mazo.id_carta.ilustracion }}" style="width: 50px;">
-                                {{ cartas_en_mazo.id_carta.nombre }}
-                            </div>
-                        {% endfor %}
-                    </div>  
+    <!-- SECCIÓN 3/4 - LISTA DE CARTAS -->
+    <div class="col-8 d-flex flex-wrap gap-4">
+        {% for carta in object_list %}
+            <div>
+                <div>Nombre: {{ carta.nombre }}</div>
 
-                </div>
-                <div class="card-footer">
-                    <form method="post" class="mb-4">
-                        {% csrf_token %}
-                        {{ form.as_p }}
-                
-                        <button type="submit" class="btn btn-success">
-                            Guardar cambios del mazo
-                        </button>
-                    </form>
+                <img src="{{ carta.ilustracion }}" alt="{{ carta.nombre }}" style="max-width:150px;">
 
+                <div class="mt-2 d-flex gap-2">
+                    <button class="btn-agregar" data-id="{{ carta.id }}">Agregar</button>
+                    <button class="btn-quitar" data-id="{{ carta.id }}">Quitar</button>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- SECCIÓN 1/4 - MAZO (STICKY) -->
+    <div class="col-4">
+        <div class="card" style="position: sticky;
+            top: 20px;  /* distancia desde arriba */
+            max-height: 90vh;
+            overflow-y: auto;">
+            <div class="card-header">
+                <h3>Cartas en este mazo:</h3>
+            </div>
+
+            <div class="card-body">
+                <div id="lista-mazo" style="display:flex; gap:10px; flex-wrap:wrap;">
+                    {% for cartas_en_mazo in cartas_mazo %}
+                        <div class="item-carta" data-id="{{cartas_en_mazo.id_carta.id}}">
+                            <img src="{{ cartas_en_mazo.id_carta.ilustracion }}" style="width:50px;">
+                            {{ cartas_en_mazo.id_carta.nombre }}
+                        </div>
+                    {% endfor %}
                 </div>
             </div>
 
-    
+            <div class="card-footer">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+
+                    <button type="submit" class="btn btn-success">
+                        Guardar cambios del mazo
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 
 </div>
+
 
 <script>
 

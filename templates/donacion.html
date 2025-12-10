@@ -1,0 +1,38 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block titulo %}
+Donaciones 🤑
+{% endblock %}
+{% block contenido %}
+
+<div class="d-flex justify-content-center"> 
+    
+    <div class="card col-12 col-md-6 mx-auto"> 
+        <div class="card-body">
+            
+            <div class="row justify-content-center mb-4"> <img src="{% static 'img/yugimon_imagen.jpg' %}" 
+                     style="height: 300px; max-width: 100%; display: block;" 
+                     alt="Imagen de Yugimon">
+            </div>
+
+            <p>Ayúdanos a seguir desarrollando esta plataforma. El equipo de Yugimon GO! Te lo agradecerá</p>
+            
+            <div class="row justify-content-center">
+                <form action="https://www.paypal.com/donate" method="post" target="_top" style="text-align: center;">
+                    <input type="hidden" name="hosted_button_id" value="8SAA73P5ZHVJC" />
+                    <input type="image" 
+                           src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" 
+                           border="0" 
+                           name="submit" 
+                           title="PayPal - The safer, easier way to pay online!" 
+                           alt="Donate with PayPal button" />
+                    <img alt="" border="0" src="https://www.paypal.com/en_CL/i/scr/pixel.gif" width="1" height="1" />
+                </form>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+    
+{% endblock %}

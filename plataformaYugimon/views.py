@@ -11,7 +11,9 @@ from django.contrib.auth.views import PasswordChangeView
 from django.views.decorators.http import  require_POST
 from django.http import JsonResponse
 import json
-from django.db.models import Sum, F, Avg
+from django.db.models import Sum, F, Avg, Count, Q
+from .models import Edicion, Tipo, Raza
+from django.core.paginator import Paginator
 
 # Create your views here.
 
@@ -97,11 +99,10 @@ class PublicacionCartaView(ListView):
     model = Publicacion_intercambio
     template_name = 'plataformaYugimon/publicacionesCartas.html'
     ordering = ['-fecha']
+    paginate_by = 5
 
-    def get_context_data(self, *args, **kwargs):
-        context = super(PublicacionCartaView, self).get_context_data(*args, **kwargs)
-        context['object_list'] = self.model.objects.all().prefetch_related('cartas_tengo', 'cartas_quiero').order_by(*self.ordering)
-        return context
+    def get_queryset(self):
+        return self.model.objects.all().prefetch_related('cartas_tengo', 'cartas_quiero').order_by(*self.ordering)
 
 #Vistas de publicaciones
 class PublicacionCartaDetail(DetailView):
@@ -268,6 +269,47 @@ def update_mazo_ajax(request):
 class CartaView(ListView):
     model = Carta
     template_name = 'plataformaYugimon/ListaCartas.html'
+    paginate_by = 20
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        query = self.request.GET.get('q')
+        if query:
+            queryset = queryset.filter(nombre__icontains=query)
+
+        edicion_id = self.request.GET.get('edicion')
+        if edicion_id:
+            queryset = queryset.filter(id_edicion=edicion_id)
+
+        tipo_id = self.request.GET.get('tipo')
+        if tipo_id:
+            queryset = queryset.filter(id_tipo=tipo_id)
+
+        raza_id = self.request.GET.get('raza')
+        if raza_id:
+            queryset = queryset.filter(id_raza=raza_id)
+
+        coste = self.request.GET.get('coste')
+        if coste:
+            queryset = queryset.filter(coste=int(coste))
+        
+        return queryset.order_by('id')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['ediciones'] = Edicion.objects.all().order_by('nombre')
+        context['tipos'] = Tipo.objects.all().order_by('nombre')
+        context['razas'] = Raza.objects.all().order_by('nombre')
+
+        
+        context['selected_edition'] = self.request.GET.get('edicion', '')
+        context['selected_tipo'] = self.request.GET.get('tipo', '')
+        context['selected_raza'] = self.request.GET.get('raza', '')
+        context['selected_coste'] = self.request.GET.get('coste', '')
+        context['selected_query'] = self.request.GET.get('q', '')
+
+        return context
 
 @login_required
 def listarMazos(request):
@@ -350,11 +392,21 @@ def verMazo(request, mazo_id):
     sort_field = allowed_sorts.get(sort_order, '-fecha')
     comentarios_ordenados = mazo.comentarios.all().order_by(sort_field)
 
+    comentarios_por_pagina = 3
+    paginator = Paginator(comentarios_ordenados, comentarios_por_pagina)
+    page_number = request.GET.get('page')
+
+    try:
+        comentarios_paginados = paginator.get_page(page_number)
+    except Exception:
+        comentarios_paginados = paginator.get_page(1)
+
     return render(request, "plataformaYugimon/verMazo.html", {
         "mazo": mazo,
         "cartas": cartas,
         "total": total,
         "comentarios_ordenados": comentarios_ordenados,
+        "comentarios_paginados": comentarios_paginados,
         "current_sort": sort_order,
         "promedio_estrellas": promedio_formateado,
         "puntuacion_usuario": puntuacion_usuario,
@@ -422,6 +474,7 @@ class PublicacionesMazosListView(ListView):
     template_name = 'plataformaYugimon/publicacionesMazos.html' 
     context_object_name = 'publicaciones'  
     ordering = ['-fecha_publicacion']
+    paginate_by = 5
 
     def get_queryset(self):
         return Publicacion_venta.objects.select_related('id_mazo').all().order_by(*self.ordering)
@@ -561,3 +614,147 @@ def misMazos(request):
     return render(request, "plataformaYugimon/listarMazos.html", {
         "mazos": mazos
     })
+
+class ComparadorMazo(ListView):
+    model = Cartas_mazos
+    template_name = 'plataformaYugimon/comparadorMazos.html' 
+    context_object_name = 'comparaciones'
+
+    def get_queryset(self):
+        return Mazo.objects.select_related('id_usuario').all()
+
+@login_required
+def obtener_datos_mazo(request, mazo_id):
+    try:
+        mazo = Mazo.objects.get(id=mazo_id)
+    except Mazo.DoesNotExist:
+        return JsonResponse({"error": "Mazo no encontrado."}, status=404)
+
+    # Obtener el listado de cartas con su cantidad y datos
+    cartas_mazo_qs = (
+        Cartas_mazos.objects
+        .filter(id_mazo=mazo)
+        .values('id_carta')
+        .annotate(
+            cantidad=Count('id_carta'),
+            nombre=F('id_carta__nombre'),
+            habilidad=F('id_carta__habilidad'),
+            raza=F('id_carta__id_raza__nombre'),
+            tipo=F('id_carta__id_tipo__nombre'),
+            edicion=F('id_carta__id_edicion__nombre'),
+            ilustracion=F('id_carta__ilustracion'),
+            coste=F('id_carta__coste'), 
+            fuerza=F('id_carta__fuerza'), 
+        )
+        .order_by('nombre')
+    )
+
+    # Calcular estadísticas del mazo
+    stats_agregadas = (
+        Cartas_mazos.objects
+        .filter(id_mazo=mazo)
+        .aggregate(
+            coste_total=Sum('id_carta__coste'),
+            fuerza_total=Sum('id_carta__fuerza'),
+            coste_promedio=Avg('id_carta__coste'),
+            fuerza_promedio=Avg('id_carta__fuerza'),
+            total_cartas=Count('id_carta')
+        )
+    )
+
+    # Calcular el promedio de estrellas del mazo
+    promedio_puntuacion = PuntuacionMazo.objects.filter(mazo=mazo).aggregate(Avg('estrellas'))
+    promedio_estrellas = promedio_puntuacion.get('estrellas__avg')
+    
+    # Formatear el promedio de estrellas
+    puntuacion_formateada = round(promedio_estrellas, 2) if promedio_estrellas is not None else 0
+
+    # Prepara los datos de las cartas para el JSON
+    cartas_list = list(cartas_mazo_qs)
+
+    # Prepara las estadísticas formateadas
+    stats_formateadas = {
+        "ID": mazo.id,
+        "Nombre": mazo.nombre,
+        "Total de Cartas": stats_agregadas.get('total_cartas', 0),
+        "Coste Total": stats_agregadas.get('coste_total', 0) or 0,
+        "Fuerza Total": stats_agregadas.get('fuerza_total', 0) or 0,
+        "Coste Promedio": round(stats_agregadas.get('coste_promedio', 0) or 0, 2),
+        "Fuerza Promedio": round(stats_agregadas.get('fuerza_promedio', 0) or 0, 2),
+        "Puntuación Promedio": puntuacion_formateada,
+    }
+
+    return JsonResponse({
+        "stats": stats_formateadas,
+        "cartas": cartas_list
+    })
+
+
+
+def me_interesa(request, pk):
+    publicacion = get_object_or_404(Publicacion_venta, pk=pk)
+
+    Notificacion.objects.create(
+        receptor = publicacion.id_usuario,
+        emisor = request.user,
+        mensaje = f"A {request.user.username} Le interesa tu publicación: {publicacion.titulo} \n Contáctate a su correo: {request.user.email}.",
+        url = f"/publicacionVentaMazos/{pk}/"
+    )
+    return redirect("detallesPublicacionVentaMazos", pk=pk)
+
+
+
+@login_required
+def leer_notificacion(request, pk):
+    notif = get_object_or_404(Notificacion, pk=pk, receptor=request.user)
+    notif.leida = True
+    notif.save()
+    
+    # si la notificación tiene URL, redirige a ella
+    if notif.url:
+        return redirect(notif.url)
+
+    # si no, vuelve a donde estaba
+    return redirect(request.META.get("HTTP_REFERER", "home"))
+
+
+@login_required
+def listar_todas_notificaciones(request):
+    notificaciones = Notificacion.objects.filter(
+        receptor=request.user
+    ).order_by("-fecha")
+
+    return render(request, "plataformaYugimon/notificaciones/todas.html", {
+        "notificaciones": notificaciones
+    })
+
+from django.shortcuts import get_object_or_404, redirect
+from .models import Publicacion_intercambio, Notificacion
+
+def me_interesa_intercambio(request, pk):
+    publicacion = get_object_or_404(Publicacion_intercambio, pk=pk)
+
+    if request.user == publicacion.autor:
+        return redirect(publicacion.get_absolute_url())
+
+    # Crear notificación
+    Notificacion.objects.create(
+        receptor=publicacion.autor,
+        emisor=request.user,
+        mensaje=f"{request.user.username} quiere intercambiar contigo., publicacion: {publicacion.titulo} \n Contáctate a su correo: {request.user.email}.",
+        url=publicacion.get_absolute_url()
+    )
+
+    return redirect(publicacion.get_absolute_url())
+
+def listar_todas_notificaciones(request):
+    notificaciones = Notificacion.objects.filter(
+        receptor=request.user
+    ).order_by('-fecha')
+
+    return render(request, "plataformaYugimon/notificaciones/todas.html", {
+        "notificaciones": notificaciones
+    })
+
+
+

@@ -19,6 +19,7 @@ from django.urls import path, include
 from plataformaYugimon.views import *
 from django.views.generic.base import TemplateView
 from django.contrib.auth.decorators import login_required
+from debug_toolbar.toolbar import debug_toolbar_urls
 
 urlpatterns = [
 
@@ -62,11 +63,13 @@ urlpatterns = [
     path("mazo/<int:mazo_id>/editar/", editar_mazo, name="editar_mazo"),
     path("mazo/update/", update_mazo, name="update_mazo"),
     path("mazo/update/ajax/", update_mazo_ajax, name="update_mazo_ajax"),
-    path('verCartas', CartaView.as_view(), name="verCartas"),
+    path('verCartas/', CartaView.as_view(), name="verCartas"),
     path("mazos/", listarMazos, name="listarMazos"),
     path("misMazos/", misMazos, name="misMazos"),
     path("mazo/<int:mazo_id>/ver/", verMazo, name="verMazo"),
     path("mazo/<int:mazo_id>/eliminar/", eliminarMazo, name="eliminarMazo"),
+    path('comparador/datos_mazo/<int:mazo_id>/', obtener_datos_mazo, name='obtener_datos_mazo'),
+    path('comparador/', login_required(ComparadorMazo.as_view()),name='comparador'),
 
     #Comentarios
     path('mazo/<int:pk>/ver/crearComentario', login_required(CrearComentario.as_view()), name="comentario"),
@@ -76,4 +79,15 @@ urlpatterns = [
     path('comentario/<int:pk>/responder/', login_required(CrearRespuestaComentario.as_view()), name="responderComentario"),
     path('editarRespuesta/<int:pk>/', login_required(EditarRespuestaComentario.as_view()), name="editarRespuesta"),
     path('eliminarRespuesta/<int:pk>/', login_required(EliminarRespuestaComentario.as_view()), name="eliminarRespuesta"),
-]
+
+
+    #Notificaciones
+    path("me-interesa/<int:pk>/", me_interesa, name="me_interesa"),
+    path("notificaciones/", listar_todas_notificaciones, name="todas_notificaciones"),
+    path("me-interesa-intercambio/<int:pk>/", me_interesa_intercambio, name="me_interesa_intercambio"),
+    path("notificaciones/<int:pk>/leer/", leer_notificacion, name="leer_notificacion"),
+
+    #Donacion
+    path('donacion/', TemplateView.as_view(template_name='donacion.html'), name='donacion'),
+
+] + debug_toolbar_urls()
