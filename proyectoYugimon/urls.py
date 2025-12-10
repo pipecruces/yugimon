@@ -87,4 +87,7 @@ urlpatterns = [
     path("me-interesa-intercambio/<int:pk>/", me_interesa_intercambio, name="me_interesa_intercambio"),
     path("notificaciones/<int:pk>/leer/", leer_notificacion, name="leer_notificacion"),
 
+    #Donacion
+    path('donacion/', TemplateView.as_view(template_name='donacion.html'), name='donacion'),
+
 ] + debug_toolbar_urls()

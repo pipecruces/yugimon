@@ -33,6 +33,16 @@ class RegistroCarta(forms.ModelForm):
     class Meta:
         model = Carta
         exclude = ['id_usuario']  
+        widgets = {
+            'nombre': forms.TextInput(attrs={'class': 'form-control'}),
+            'habilidad': forms.TextInput(attrs={'class': 'form-control'}),
+            'fuerza': forms.TextInput(attrs={'class': 'form-control'}),
+            'coste': forms.TextInput(attrs={'class': 'form-control'}),
+            'id_raza': forms.Select(attrs={'class': 'form-control'}),
+            'ilustracion': forms.TextInput(attrs={'class': 'form-control'}),
+            'id_edicion': forms.Select(attrs={'class': 'form-control'}),
+            'id_tipo': forms.Select(attrs={'class': 'form-control'}),
+        }
 
 class RegistroMazo(forms.Form):
     nombre = forms.CharField(max_length=50)
